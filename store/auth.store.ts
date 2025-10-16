@@ -12,6 +12,7 @@ type AuthState = {
     setLoading: (loading: boolean) => void;
 
     fetchAuthenticatedUser: () => Promise<void>;
+    logout: () => void;
 }
 
 const useAuthBear = create<AuthState>((set) => ({
@@ -37,6 +38,10 @@ const useAuthBear = create<AuthState>((set) => ({
     } finally {
         set({ isLoading: false });
     }
+  },
+
+  logout: () => {
+    set({ isAuthenticated: false, user: null });
   }
 }))
 
