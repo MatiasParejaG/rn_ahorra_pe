@@ -16,9 +16,15 @@ const TabBarIcon = ({ focused, icon , title }: TabBarIconProps) => (
 )
 
 export default function TabLayout() {
-  const { isAuthenticated } = useAuthBear();
+  const { isAuthenticated, user } = useAuthBear();
 
   if(!isAuthenticated) return <Redirect href={"/sign-in"} />
+  
+  // Si no ha completado el setup inicial, redirigir
+  if(user && !user.initial_setup) {
+    return <Redirect href="/initial-setup" />
+  }
+  
     return (
     <>
     <Tabs

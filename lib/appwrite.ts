@@ -13,6 +13,7 @@ export const appWriteConfig = {
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
   databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
   userTableId: process.env.EXPO_PUBLIC_APPWRITE_USER_TABLE_ID!,
+  accountTableId: process.env.EXPO_PUBLIC_APPWRITE_CUENTAS_TABLE_ID!,
   platform: "com.mapg.ahorrape",
 };
 
@@ -55,6 +56,7 @@ export const createUser = async ({
         email: email,
         name: name,
         avatar: avatarUrl,
+        initial_setup: false,
       },
     });
   } catch (e) {
@@ -64,13 +66,11 @@ export const createUser = async ({
 
 export const signIn = async ({ email, password }: SignInParams) => {
   try {
-    // Ensure no active session exists before creating a new one
     try {
       await account.deleteSession({
         sessionId: 'current'
       });
     } catch (e) {
-      // Session may not exist, which is fine
       console.log('No existing session to delete');
     }
 
@@ -102,7 +102,6 @@ export const logOut = async () => {
       sessionId: 'current'
     });
   } catch (e) {
-    // Session may not exist, which is fine
     console.log('Error deleting session:', e);
   }
 };
@@ -124,5 +123,66 @@ export const getCurrentUser = async () => {
   } catch (e) {
     console.log(e);
     throw new Error(e as string);
+  }
+};
+
+// Crear cuenta financiera del usuario
+export const createUserAccount = async ({
+  userId,
+  saldoInicial,
+  divisa,
+}: {
+  userId: string;
+  saldoInicial: number;
+  divisa: string;
+}) => {
+  try {
+    const cuentaId = ID.unique();
+    
+    // Crear la cuenta
+    const newAccount = await database.createRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.accountTableId,
+      rowId: cuentaId,
+      data: {
+        cuenta_id: cuentaId,
+        saldo_actual: saldoInicial,
+        divisa: divisa,
+        user_ref: userId,
+      },
+    });
+
+    // Actualizar el flag initial_setup del usuario
+    await database.updateRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.userTableId,
+      rowId: userId,
+      data: {
+        initial_setup: true,
+      },
+    });
+
+    return newAccount;
+  } catch (e) {
+    console.log('Error creating account:', e);
+    throw new Error(e as string);
+  }
+};
+
+// Obtener cuenta del usuario
+export const getUserAccount = async (userId: string) => {
+  try {
+    const accounts = await database.listRows({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.accountTableId,
+      queries: [Query.equal("user_ref", userId)],
+    });
+
+    if (!accounts || accounts.rows.length === 0) return null;
+
+    return accounts.rows[0];
+  } catch (e) {
+    console.log('Error getting user account:', e);
+    return null;
   }
 };

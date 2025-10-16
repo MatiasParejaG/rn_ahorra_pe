@@ -11,7 +11,7 @@ import { Alert, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
-  const { user, setIsAuthenticated, setUser } = useAuthBear();
+  const { user, userAccount, setIsAuthenticated, setUser, setUserAccount } = useAuthBear();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -23,6 +23,7 @@ export default function Index() {
       // Clear auth state
       setIsAuthenticated(false);
       setUser(null);
+      setUserAccount(null);
 
       // Redirect to sign-in
       router.replace('/sign-in');
@@ -30,6 +31,17 @@ export default function Index() {
       Alert.alert('Error', error.message || 'Failed to log out');
       setIsLoggingOut(false);
     }
+  };
+
+  const formatBalance = () => {
+    if (!userAccount) return 'S/ 0.00';
+    
+    const symbol = userAccount.divisa === 'PEN' ? 'S/' :
+                   userAccount.divisa === 'USD' ? '$' :
+                   userAccount.divisa === 'EUR' ? '€' :
+                   userAccount.divisa === 'ARS' ? '$' : 'S/';
+    
+    return `${symbol} ${userAccount.saldo_actual.toFixed(2)}`;
   };
 
   return (
@@ -40,7 +52,7 @@ export default function Index() {
           <HomeHeader userName={user?.name || 'Usuario'} userAvatar={user?.avatar} />
 
           {/* Saldo Total Card with Gradient */}
-          <BalanceCard balance="S/ 450.00" percentageChange="+15% este mes" />
+          <BalanceCard balance={formatBalance()} percentageChange="+15% este mes" />
         </View>
 
         {/* Quick Actions */}
@@ -92,4 +104,3 @@ export default function Index() {
     </SafeAreaView>
   );
 }
-
