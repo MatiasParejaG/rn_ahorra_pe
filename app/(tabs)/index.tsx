@@ -44,6 +44,20 @@ export default function Index() {
     return `${symbol} ${userAccount.saldo_actual.toFixed(2)}`;
   };
 
+  const handleAddIngreso = () => {
+    router.push({
+      pathname: '/(tabs)/add-transaction',
+      params: { type: 'ingreso' }
+    });
+  };
+
+  const handleAddGasto = () => {
+    router.push({
+      pathname: '/(tabs)/add-transaction',
+      params: { type: 'gasto' }
+    });
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView className="flex-1">
@@ -58,8 +72,16 @@ export default function Index() {
         {/* Quick Actions */}
         <View className="px-4 py-6">
           <View className="flex-row">
-            <QuickActionButton icon="plus" label="Ahorrar" />
-            <QuickActionButton icon="minus" label="Gasto" />
+            <QuickActionButton 
+              icon="plus" 
+              label="Ahorrar" 
+              onPress={handleAddIngreso}
+            />
+            <QuickActionButton 
+              icon="minus" 
+              label="Gasto" 
+              onPress={handleAddGasto}
+            />
             <QuickActionButton icon="info" label="Meta" />
           </View>
         </View>

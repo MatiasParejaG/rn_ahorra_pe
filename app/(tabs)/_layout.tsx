@@ -80,6 +80,13 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => <TabBarIcon title="Perfil" icon={icons.perfil} focused = {focused}/>
         }}
       />
+
+      <Tabs.Screen
+        name='add-transaction'
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
     <StatusBar barStyle="dark-content"/>
     </>

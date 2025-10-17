@@ -1,4 +1,3 @@
-
 export interface Category {
     name: string;
     description: string;
@@ -22,6 +21,23 @@ export interface UserAccount {
   user_ref: string;
 }
 
+export interface Transaction {
+  $id: string;
+  transaccion_id: string;
+  tipo: 'ingreso' | 'gasto';
+  monto: number;
+  descripcion?: string;
+  fecha: string;
+  categoria?: string;
+  cuenta_ref: string;
+}
+
+export interface LocalCategory {
+  id: string;
+  name: string;
+  type: 'ingreso' | 'gasto';
+  icon?: string;
+}
 
 export interface Currency {
   code: string;
@@ -34,7 +50,6 @@ interface TabBarIconProps {
     icon: ImageSourcePropType;
     title: string;
 }
-
 
 interface CustomButtonProps {
     onPress?: () => void;
@@ -73,4 +88,12 @@ interface CreateUserPrams {
 interface SignInParams {
     email: string;
     password: string;
+}
+
+interface CreateTransactionParams {
+  tipo: 'ingreso' | 'gasto';
+  monto: number;
+  descripcion?: string;
+  categoria?: string;
+  cuentaId: string;
 }
