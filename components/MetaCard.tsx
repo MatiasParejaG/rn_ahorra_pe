@@ -8,6 +8,7 @@ interface MetaCardProps {
   saved: number;
   total: number;
   progressColor: string;
+  currencySymbol?: string;
 }
 
 export default function MetaCard({
@@ -17,6 +18,7 @@ export default function MetaCard({
   saved,
   total,
   progressColor,
+  currencySymbol = 'S/',
 }: MetaCardProps) {
   const getIcon = () => {
     if (icon === 'bike') {
@@ -48,7 +50,7 @@ export default function MetaCard({
           {getIcon()}
           <View className="flex-1 ml-3">
             <Text className="text-gray-800 font-semibold text-base">{title}</Text>
-            <Text className="text-gray-500 text-xs">Meta: S/ {total}</Text>
+            <Text className="text-gray-500 text-xs">Meta: {currencySymbol} {total.toFixed(2)}</Text>
           </View>
         </View>
         <Text className="text-gray-700 font-bold text-sm">{progress}%</Text>
@@ -64,8 +66,8 @@ export default function MetaCard({
       </View>
 
       <View className="flex-row justify-between">
-        <Text className="text-gray-600 text-xs">S/ {saved} ahorrados</Text>
-        <Text className="text-gray-600 text-xs">Falta S/ {total - saved}</Text>
+        <Text className="text-gray-600 text-xs">{currencySymbol} {saved.toFixed(2)} ahorrados</Text>
+        <Text className="text-gray-600 text-xs">Falta {currencySymbol} {(total - saved).toFixed(2)}</Text>
       </View>
     </View>
   );

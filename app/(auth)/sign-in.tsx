@@ -4,11 +4,13 @@ import { signIn } from "@/lib/appwrite";
 import useAuthBear from "@/store/auth.store";
 import { Link, router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Text, View } from "react-native";
 
 const SignIn = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({ email: '', password: ''});
+  const [isNavigating, setIsNavigating] = useState(false);
+  
   const { setIsAuthenticated, setUser, fetchAuthenticatedUser } = useAuthBear();
 
   const submit = async() => {
@@ -35,6 +37,30 @@ const SignIn = () => {
   
   return (
     <View className="gap-6 bg-white rounded-3xl p-8 m-5 mb-10" style={{backgroundColor: 'rgba(255, 255, 255, 0.08)'}}>
+      {/* Loading Overlay */}
+      {(isSubmitting || isNavigating) && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <View className="bg-white rounded-2xl p-6 items-center">
+            <ActivityIndicator size="large" color="#FE8C00" />
+            <Text className="text-gray-800 font-semibold mt-4">
+              {isSubmitting ? 'Iniciando Sesión...' : 'Actualizando...'}
+            </Text>
+          </View>
+        </View>
+      )}
+      
       <CustomInput 
             placeholder="Ingresa tu correo"
             value={form.email}

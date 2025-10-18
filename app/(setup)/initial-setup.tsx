@@ -7,14 +7,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -24,6 +25,7 @@ export default function InitialSetup() {
   const [saldoInicial, setSaldoInicial] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState('PEN');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleNext = () => {
     if (step === 1) {
@@ -77,6 +79,29 @@ export default function InitialSetup() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      {/* Loading Overlay */}
+      {(isSubmitting || isNavigating) && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <View className="bg-white rounded-2xl p-6 items-center">
+            <ActivityIndicator size="large" color="#FE8C00" />
+            <Text className="text-gray-800 font-semibold mt-4">
+              {isSubmitting ? 'Configurando...' : 'Actualizando...'}
+            </Text>
+          </View>
+        </View>
+      )}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View className="flex-1">
           {/* Header con progreso */}

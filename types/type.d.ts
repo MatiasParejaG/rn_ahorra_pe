@@ -32,6 +32,17 @@ export interface Transaction {
   cuenta_ref: string;
 }
 
+export interface Meta {
+  $id: string;
+  meta_id: string;
+  nombre: string;
+  monto_objetivo: number;
+  monto_actual: number;
+  fecha_objetivo?: string;
+  estado: boolean;
+  user_ref: string;
+}
+
 export interface LocalCategory {
   id: string;
   name: string;
@@ -70,7 +81,7 @@ interface CustomInputProps {
     onChangeText?: (text: string) => void;
     label?: string;
     secureTextEntry?: boolean;
-    keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
+    keyboardType?: "default" | "email-address" | "numeric" | "phone-pad" | "decimal-pad";
 }
 
 interface ProfileFieldProps {
@@ -95,5 +106,18 @@ interface CreateTransactionParams {
   monto: number;
   descripcion?: string;
   categoria?: string;
+  cuentaId: string;
+}
+
+interface CreateMetaParams {
+  nombre: string;
+  monto_objetivo: number;
+  fecha_objetivo?: string;
+  userId: string;
+}
+
+interface AddFundsToMetaParams {
+  metaId: string;
+  monto: number;
   cuentaId: string;
 }

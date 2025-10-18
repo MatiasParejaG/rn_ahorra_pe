@@ -7,11 +7,11 @@ import { logOut } from '@/lib/appwrite';
 import useAuthBear from '@/store/auth.store';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
-  const { user, userAccount, setIsAuthenticated, setUser, setUserAccount } = useAuthBear();
+  const { user, userAccount, userMetas, setIsAuthenticated, setUser, setUserAccount, setUserMetas } = useAuthBear();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -24,6 +24,7 @@ export default function Index() {
       setIsAuthenticated(false);
       setUser(null);
       setUserAccount(null);
+      setUserMetas([]);
 
       // Redirect to sign-in
       router.replace('/sign-in');
@@ -44,6 +45,17 @@ export default function Index() {
     return `${symbol} ${userAccount.saldo_actual.toFixed(2)}`;
   };
 
+  const getCurrencySymbol = () => {
+    if (!userAccount) return 'S/';
+    
+    const symbol = userAccount.divisa === 'PEN' ? 'S/' :
+                   userAccount.divisa === 'USD' ? '$' :
+                   userAccount.divisa === 'EUR' ? '€' :
+                   userAccount.divisa === 'ARS' ? '$' : 'S/';
+    
+    return symbol;
+  };
+
   const handleAddIngreso = () => {
     router.push({
       pathname: '/(tabs)/add-transaction',
@@ -57,6 +69,13 @@ export default function Index() {
       params: { type: 'gasto' }
     });
   };
+
+  const handleNavigateToMetas = () => {
+    router.push('/(metas)/metas-list');
+  };
+
+  // Mostrar solo las primeras 2 metas activas
+  const displayedMetas = userMetas.filter(m => !m.estado).slice(0, 2);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -82,7 +101,11 @@ export default function Index() {
               label="Gasto" 
               onPress={handleAddGasto}
             />
-            <QuickActionButton icon="info" label="Meta" />
+            <QuickActionButton 
+              icon="info" 
+              label="Meta" 
+              onPress={handleNavigateToMetas}
+            />
           </View>
         </View>
 
@@ -90,28 +113,46 @@ export default function Index() {
         <View className="px-5 pb-6">
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-lg font-bold text-gray-800">Mis Metas</Text>
-            <Text className="text-blue-500 font-semibold text-sm">Ver todas</Text>
+            <TouchableOpacity onPress={handleNavigateToMetas}>
+              <Text className="text-blue-500 font-semibold text-sm">
+                {userMetas.length > 0 ? 'Ver todas' : 'Crear Meta'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Meta 1: Bicicleta */}
-          <MetaCard
-            icon="bike"
-            title="Bicicleta nueva"
-            progress={75}
-            saved={600}
-            total={800}
-            progressColor="#2196F3"
-          />
-
-          {/* Meta 2: Nintendo Switch */}
-          <MetaCard
-            icon="gamepad"
-            title="Nintendo Switch"
-            progress={25}
-            saved={300}
-            total={1200}
-            progressColor="#E91E63"
-          />
+          {displayedMetas.length > 0 ? (
+            displayedMetas.map((meta) => {
+              const progress = (meta.monto_actual / meta.monto_objetivo) * 100;
+              const remaining = meta.monto_objetivo - meta.monto_actual;
+              
+              return (
+                <MetaCard
+                  key={meta.$id}
+                  icon="gamepad"
+                  title={meta.nombre}
+                  progress={Math.round(progress)}
+                  saved={meta.monto_actual}
+                  total={meta.monto_objetivo}
+                  progressColor="#4A90E2"
+                  currencySymbol={getCurrencySymbol()}
+                />
+              );
+            })
+          ) : (
+            <View className="bg-white rounded-xl p-6 items-center">
+              <Text className="text-gray-500 text-center mb-4">
+                Aún no tienes metas de ahorro
+              </Text>
+              <TouchableOpacity 
+                onPress={handleNavigateToMetas}
+                className="bg-primary/10 px-6 py-3 rounded-xl"
+              >
+                <Text className="text-primary font-semibold">
+                  Crear mi primera meta
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Logout Button */}
