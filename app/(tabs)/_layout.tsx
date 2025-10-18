@@ -87,6 +87,13 @@ export default function TabLayout() {
           href: null,
         }}
       />
+
+      <Tabs.Screen
+        name='transaction-list'
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
     <StatusBar barStyle="dark-content"/>
     </>

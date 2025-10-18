@@ -1,18 +1,40 @@
 import BalanceCard from '@/components/BalanceCard';
-import CustomButton from '@/components/CustomButton';
 import HomeHeader from '@/components/HomeHeader';
 import MetaCard from '@/components/MetaCard';
 import QuickActionButton from '@/components/QuickActionButton';
-import { logOut } from '@/lib/appwrite';
+import TransactionCard from '@/components/TransactionCard';
+import { getAccountTransactions, logOut } from '@/lib/appwrite';
 import useAuthBear from '@/store/auth.store';
+import { Transaction } from '@/types/type';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
   const { user, userAccount, userMetas, setIsAuthenticated, setUser, setUserAccount, setUserMetas } = useAuthBear();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+
+  // Cargar las últimas 3 transacciones
+  useEffect(() => {
+    const loadRecentTransactions = async () => {
+      if (!userAccount?.$id) return;
+      
+      setIsLoadingTransactions(true);
+      try {
+        const transactions = await getAccountTransactions(userAccount.$id, 3);
+        setRecentTransactions(transactions as Transaction[]);
+      } catch (error) {
+        console.log('Error loading transactions:', error);
+      } finally {
+        setIsLoadingTransactions(false);
+      }
+    };
+
+    loadRecentTransactions();
+  }, [userAccount]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -74,15 +96,23 @@ export default function Index() {
     router.push('/(metas)/metas-list');
   };
 
+  const handleNavigateToTransactions = () => {
+    router.push('/(tabs)/transaction-list');
+  };
+
   // Mostrar solo las primeras 2 metas activas
   const displayedMetas = userMetas.filter(m => !m.estado).slice(0, 2);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="bg-white px-5 pt-4 pb-4">
-          <HomeHeader userName={user?.name || 'Usuario'} userAvatar={user?.avatar} />
+          <HomeHeader 
+            userName={user?.name || 'Usuario'} 
+            userAvatar={user?.avatar}
+            onLogout={handleLogout}
+          />
 
           {/* Saldo Total Card with Gradient */}
           <BalanceCard balance={formatBalance()} percentageChange="+15% este mes" />
@@ -109,6 +139,32 @@ export default function Index() {
           </View>
         </View>
 
+        {/* Transacciones Recientes Section */}
+        {recentTransactions.length > 0 && (
+          <View className="px-5 pb-6">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-lg font-bold text-gray-800">Transacciones Recientes</Text>
+              <TouchableOpacity onPress={handleNavigateToTransactions}>
+                <Text className="text-blue-500 font-semibold text-sm">Ver todas</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              className="max-h-80"
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
+            >
+              {recentTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.$id}
+                  transaction={transaction}
+                  currencySymbol={getCurrencySymbol()}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Mis Metas Section */}
         <View className="px-5 pb-6">
           <View className="flex-row items-center justify-between mb-4">
@@ -123,7 +179,6 @@ export default function Index() {
           {displayedMetas.length > 0 ? (
             displayedMetas.map((meta) => {
               const progress = (meta.monto_actual / meta.monto_objetivo) * 100;
-              const remaining = meta.monto_objetivo - meta.monto_actual;
               
               return (
                 <MetaCard
@@ -153,15 +208,6 @@ export default function Index() {
               </TouchableOpacity>
             </View>
           )}
-        </View>
-
-        {/* Logout Button */}
-        <View className="px-5 pb-10">
-          <CustomButton
-            title="Cerrar Sesión"
-            onPress={handleLogout}
-            isLoading={isLoggingOut}
-          />
         </View>
       </ScrollView>
     </SafeAreaView>
