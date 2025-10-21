@@ -121,3 +121,50 @@ interface AddFundsToMetaParams {
   monto: number;
   cuentaId: string;
 }
+
+// Tipos para Grupos
+export interface Grupo {
+  $id: string;
+  group_Id: string;
+  nombre: string;
+  descripcion?: string;
+  tag: string;
+  created_by: string | User; // Relationship
+  foto_bg?: string;
+  $createdAt?: string;
+}
+
+export interface GrupoMiembro {
+  $id: string;
+  group_ref: string | Grupo; // Relationship
+  user_ref: string | User; // Relationship
+  rol: 'admin' | 'miembro';
+  fecha_union: string;
+}
+
+// Params para crear grupo
+export interface CreateGrupoParams {
+  nombre: string;
+  descripcion?: string;
+  userId: string;
+}
+
+// Params para unirse a un grupo
+export interface JoinGrupoParams {
+  tag: string;
+  userId: string;
+}
+
+// Params para actualizar grupo
+export interface UpdateGrupoParams {
+  groupId: string;
+  nombre?: string;
+  descripcion?: string;
+  foto_bg?: string;
+}
+
+// Params para actualizar rol de miembro
+export interface UpdateMemberRoleParams {
+  membershipId: string;
+  newRole: 'admin' | 'miembro';
+}

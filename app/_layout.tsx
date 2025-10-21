@@ -34,5 +34,10 @@ export default function RootLayout() {
     name="(metas)"
     options={{ headerShown: false }}
   />
+  
+  <Stack.Screen
+    name="(grupos)"
+    options={{ headerShown: false }}
+  />
   </Stack>
 }
