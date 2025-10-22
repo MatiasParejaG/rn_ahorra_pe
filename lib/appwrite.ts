@@ -5,6 +5,7 @@ import {
   Client,
   ID,
   Query,
+  Storage,
   TablesDB,
 } from "react-native-appwrite";
 
@@ -19,6 +20,7 @@ export const appWriteConfig = {
   grupoTableId: process.env.EXPO_PUBLIC_APPWRITE_GRUPO_TABLE_ID!,
   grupoMiembroTableId: process.env.EXPO_PUBLIC_APPWRITE_GRUPO_MIEMBRO_TABLE_ID!,
   invitacionTableId: process.env.EXPO_PUBLIC_APPWRITE_INVITACION_TABLE_ID!,
+  storageBucketId: process.env.EXPO_PUBLIC_APPWRITE_STORAGE_BUCKET_ID!,
   platform: "com.mapg.ahorrape",
 };
 
@@ -30,6 +32,7 @@ client
 
 export const account = new Account(client);
 export const database = new TablesDB(client);
+export const storage = new Storage(client);
 
 const avatars = new Avatars(client);
 
@@ -114,7 +117,6 @@ export const createUser = async ({
     await signIn({ email, password });
 
     const avatarUrl = avatars.getInitialsURL(name);
-    // Generar tag único para el usuario
     const userTag = await generateUserTag(name);
 
     return await database.createRow({
@@ -126,8 +128,9 @@ export const createUser = async ({
         email: email,
         name: name,
         avatar: avatarUrl,
-        initial_setup: false,
+        avatar_file_id: '', 
         tag: userTag,
+        initial_setup: false,
       },
     });
   } catch (e) {
@@ -1047,5 +1050,164 @@ export const rejectInvitacion = async (invitacionId: string) => {
   } catch (e) {
     console.log('Error rejecting invitacion:', e);
     throw new Error(e as string);
+  }
+};
+
+// FUNCIONES DE STORAGE (AVATARES)
+
+export const uploadAvatar = async (fileUri: string, userId: string) => {
+  try {
+    const fileName = `avatar_${userId}_${Date.now()}.jpg`;
+    
+    // Obtener información del archivo
+    const fileInfo = await fetch(fileUri);
+    const blob = await fileInfo.blob();
+    
+    // Crear File object compatible con RN
+    const file = {
+      name: fileName,
+      type: blob.type || 'image/jpeg',
+      size: blob.size,
+      uri: fileUri,
+    };
+    
+    console.log('Uploading file:', file);
+    
+    // Subir archivo usando la sintaxis correcta para RN
+    const uploadedFile = await storage.createFile(
+      appWriteConfig.storageBucketId,
+      ID.unique(),
+      file as any
+    );
+    
+    console.log('File uploaded:', uploadedFile); 
+    
+    // Construir URL 
+    const fileUrl = `${appWriteConfig.endpoint}/storage/buckets/${appWriteConfig.storageBucketId}/files/${uploadedFile.$id}/view?project=${appWriteConfig.projectId}`;
+    
+    return {
+      fileId: uploadedFile.$id,
+      fileUrl: fileUrl,
+    };
+  } catch (e) {
+    console.log('Error uploading avatar:', e);
+    throw new Error(e as string);
+  }
+};
+
+// Eliminar avatar anterior
+export const deleteAvatar = async (fileId: string) => {
+  try {
+    await storage.deleteFile({
+      bucketId: appWriteConfig.storageBucketId,
+      fileId: fileId,
+    });
+    return true;
+  } catch (e) {
+    console.log('Error deleting avatar:', e);
+    // No lanzar error si el archivo no existe
+    return false;
+  }
+};
+
+// Actualizar perfil de usuario
+export const updateUserProfile = async ({
+  userId,
+  name,
+  tag,
+  avatarUrl,
+  avatarFileId, 
+  oldAvatarFileId,
+}: {
+  userId: string;
+  name?: string;
+  tag?: string;
+  avatarUrl?: string;
+  avatarFileId?: string; 
+  oldAvatarFileId?: string;
+}) => {
+  try {
+    // Si hay un tag nuevo, verificar que sea único
+    if (tag) {
+      const existingUsers = await database.listRows({
+        databaseId: appWriteConfig.databaseId,
+        tableId: appWriteConfig.userTableId,
+        queries: [Query.equal("tag", tag.toLowerCase())],
+      });
+      
+      if (existingUsers.rows.length > 0 && existingUsers.rows[0].$id !== userId) {
+        throw new Error('Este tag ya está en uso');
+      }
+    }
+    
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (tag !== undefined) updateData.tag = tag.toLowerCase();
+    if (avatarUrl !== undefined) updateData.avatar = avatarUrl;
+    if (avatarFileId !== undefined) updateData.avatar_file_id = avatarFileId; // NUEVO
+    
+    const updatedUser = await database.updateRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.userTableId,
+      rowId: userId,
+      data: updateData,
+    });
+    
+    // Si se actualizó el avatar y hay uno anterior, eliminarlo
+    if (avatarUrl && oldAvatarFileId) {
+      await deleteAvatar(oldAvatarFileId);
+    }
+    
+    return updatedUser;
+  } catch (e) {
+    console.log('Error updating user profile:', e);
+    throw new Error(e as string);
+  }
+};
+
+// Obtener estadísticas del usuario
+export const getUserStats = async (userId: string) => {
+  try {
+    // Obtener metas completadas
+    const completedMetas = await database.listRows({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.metaTableId,
+      queries: [
+        Query.equal("user_ref", userId),
+        Query.equal("estado", true),
+      ],
+    });
+    
+    // Obtener grupos del usuario
+    const grupos = await getUserGrupos(userId);
+    
+    // Obtener cuenta del usuario para contar transacciones de ingreso
+    const account = await getUserAccount(userId);
+    let ingresosCount = 0;
+    
+    if (account) {
+      const ingresos = await database.listRows({
+        databaseId: appWriteConfig.databaseId,
+        tableId: appWriteConfig.transactionTableId,
+        queries: [
+          Query.equal("cuenta_ref", account.$id),
+          Query.equal("tipo", "ingreso"),
+        ],
+      });
+      ingresosCount = ingresos.rows.length;
+    }
+    
+    return {
+      metasCompletadas: completedMetas.rows.length,
+      gruposCount: grupos.length,
+      ingresosCount,
+    };
+  } catch (e) {
+    console.log('Error getting user stats:', e);
+    return {
+      metasCompletadas: 0,
+      gruposCount: 0,
+      ingresosCount: 0,
+    };
   }
 };

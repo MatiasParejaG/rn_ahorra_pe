@@ -10,7 +10,16 @@ export interface User {
   email: string;
   accountId: string;
   avatar: string;
+  avatar_file_id?: string;
+  tag: string; 
   initial_setup: boolean;
+  $createdAt?: string; 
+}
+
+export interface UserStats {
+  metasCompletadas: number;
+  gruposCount: number;
+  ingresosCount: number;
 }
 
 export interface UserAccount {
