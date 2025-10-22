@@ -21,6 +21,7 @@ export default function GruposLayout() {
       <Stack.Screen name="join-grupo" />
       <Stack.Screen name="grupo-detail" />
       <Stack.Screen name="manage-grupo" />
+      <Stack.Screen name="invitations-list" />
     </Stack>
   );
 }

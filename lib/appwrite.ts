@@ -18,6 +18,7 @@ export const appWriteConfig = {
   metaTableId: process.env.EXPO_PUBLIC_APPWRITE_META_TABLE_ID!,
   grupoTableId: process.env.EXPO_PUBLIC_APPWRITE_GRUPO_TABLE_ID!,
   grupoMiembroTableId: process.env.EXPO_PUBLIC_APPWRITE_GRUPO_MIEMBRO_TABLE_ID!,
+  invitacionTableId: process.env.EXPO_PUBLIC_APPWRITE_INVITACION_TABLE_ID!,
   platform: "com.mapg.ahorrape",
 };
 
@@ -31,6 +32,69 @@ export const account = new Account(client);
 export const database = new TablesDB(client);
 
 const avatars = new Avatars(client);
+
+export const generateUserTag = async (name: string): Promise<string> => {
+  // Dividir el nombre en palabras
+  const nameParts = name.trim().split(' ');
+  
+  // Obtener primer nombre completo en minúsculas
+  let baseTag = nameParts[0].toLowerCase();
+  
+  // Si hay segundo nombre, agregar su primera letra
+  if (nameParts.length > 1) {
+    baseTag += nameParts[1].charAt(0).toLowerCase();
+  }
+  
+  // Generar 4 caracteres aleatorios
+  const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+  let randomSuffix = '';
+  let isUnique = false;
+  
+  while (!isUnique) {
+    randomSuffix = '';
+    for (let i = 0; i < 4; i++) {
+      randomSuffix += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    
+    const fullTag = `@${baseTag}${randomSuffix}`;
+    
+    // Verificar si el tag ya existe
+    try {
+      const existingUsers = await database.listRows({
+        databaseId: appWriteConfig.databaseId,
+        tableId: appWriteConfig.userTableId,
+        queries: [Query.equal("tag", fullTag)],
+      });
+      
+      if (existingUsers.rows.length === 0) {
+        isUnique = true;
+      }
+    } catch (e) {
+      console.log('Error checking tag uniqueness:', e);
+    }
+  }
+  
+  return `@${baseTag}${randomSuffix}`;
+};
+
+export const findUserByTag = async (tag: string) => {
+  try {
+    const users = await database.listRows({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.userTableId,
+      queries: [Query.equal("tag", tag.toLowerCase())],
+    });
+    
+    if (users.rows.length === 0) {
+      return null;
+    }
+    
+    return users.rows[0];
+  } catch (e) {
+    console.log('Error finding user by tag:', e);
+    return null;
+  }
+};
 
 export const createUser = async ({
   email,
@@ -50,6 +114,8 @@ export const createUser = async ({
     await signIn({ email, password });
 
     const avatarUrl = avatars.getInitialsURL(name);
+    // Generar tag único para el usuario
+    const userTag = await generateUserTag(name);
 
     return await database.createRow({
       databaseId: appWriteConfig.databaseId,
@@ -61,6 +127,7 @@ export const createUser = async ({
         name: name,
         avatar: avatarUrl,
         initial_setup: false,
+        tag: userTag,
       },
     });
   } catch (e) {
@@ -764,6 +831,221 @@ export const leaveGrupo = async (membershipId: string, userId: string, groupId: 
     return true;
   } catch (e) {
     console.log('Error leaving grupo:', e);
+    throw new Error(e as string);
+  }
+};
+
+// FUNCIONES DE INVITACIONES
+
+// Crear invitación
+export const createInvitacion = async ({
+  groupId,
+  invitedByUserId,
+  invitedUserId,
+}: {
+  groupId: string;
+  invitedByUserId: string;
+  invitedUserId: string;
+}) => {
+  try {
+    // Verificar que el usuario invitado no sea ya miembro
+    const existingMembership = await database.listRows({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.grupoMiembroTableId,
+      queries: [
+        Query.equal("group_ref", groupId),
+        Query.equal("user_ref", invitedUserId),
+      ],
+    });
+    
+    if (existingMembership.rows.length > 0) {
+      throw new Error('Este usuario ya es miembro del grupo');
+    }
+    
+    // Verificar que no exista una invitación pendiente
+    const existingInvitation = await database.listRows({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.invitacionTableId,
+      queries: [
+        Query.equal("group_ref", groupId),
+        Query.equal("invited_user_ref", invitedUserId),
+        Query.equal("estado", "pendiente"),
+      ],
+    });
+    
+    if (existingInvitation.rows.length > 0) {
+      throw new Error('Ya existe una invitación pendiente para este usuario');
+    }
+    
+    // Calcular fecha de expiración (7 días desde ahora)
+    const fechaExpiracion = new Date();
+    fechaExpiracion.setDate(fechaExpiracion.getDate() + 7);
+    
+    const invitacionId = ID.unique();
+    const newInvitacion = await database.createRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.invitacionTableId,
+      rowId: invitacionId,
+      data: {
+        group_ref: groupId,
+        invited_by_ref: invitedByUserId,
+        invited_user_ref: invitedUserId,
+        estado: 'pendiente',
+        fecha_expiracion: fechaExpiracion.toISOString(),
+      },
+    });
+    
+    return newInvitacion;
+  } catch (e) {
+    console.log('Error creating invitacion:', e);
+    throw new Error(e as string);
+  }
+};
+
+// Obtener invitaciones del usuario
+export const getUserInvitaciones = async (userId: string) => {
+  try {
+    const invitaciones = await database.listRows({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.invitacionTableId,
+      queries: [
+        Query.equal("invited_user_ref", userId),
+        Query.equal("estado", "pendiente"),
+        Query.orderDesc("$createdAt"),
+      ],
+    });
+    
+    // Verificar y actualizar invitaciones expiradas
+    const now = new Date();
+    const validInvitaciones = await Promise.all(
+      invitaciones.rows.map(async (inv: any) => {
+        const fechaExp = new Date(inv.fecha_expiracion);
+        
+        if (fechaExp < now && inv.estado === 'pendiente') {
+          // Marcar como expirada
+          await database.updateRow({
+            databaseId: appWriteConfig.databaseId,
+            tableId: appWriteConfig.invitacionTableId,
+            rowId: inv.$id,
+            data: { estado: 'expirada' },
+          });
+          return null;
+        }
+        
+        return inv;
+      })
+    );
+    
+    // Filtrar las invitaciones expiradas
+    const activeInvitaciones = validInvitaciones.filter(inv => inv !== null);
+    
+    // Obtener detalles del grupo y del usuario que invitó
+    const invitacionesConDetalles = await Promise.all(
+      activeInvitaciones.map(async (inv: any) => {
+        try {
+          const grupo = await database.getRow({
+            databaseId: appWriteConfig.databaseId,
+            tableId: appWriteConfig.grupoTableId,
+            rowId: inv.group_ref,
+          });
+          
+          const invitedBy = await database.getRow({
+            databaseId: appWriteConfig.databaseId,
+            tableId: appWriteConfig.userTableId,
+            rowId: inv.invited_by_ref,
+          });
+          
+          return {
+            ...inv,
+            grupo,
+            invitedBy,
+          };
+        } catch (e) {
+          console.log('Error fetching invitation details:', e);
+          return null;
+        }
+      })
+    );
+    
+    return invitacionesConDetalles.filter(inv => inv !== null);
+  } catch (e) {
+    console.log('Error getting user invitaciones:', e);
+    return [];
+  }
+};
+
+// Aceptar invitación
+export const acceptInvitacion = async (invitacionId: string, userId: string) => {
+  try {
+    // Obtener la invitación
+    const invitacion = await database.getRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.invitacionTableId,
+      rowId: invitacionId,
+    });
+    
+    // Verificar que la invitación esté pendiente
+    if (invitacion.estado !== 'pendiente') {
+      throw new Error('Esta invitación ya no está disponible');
+    }
+    
+    // Verificar que no haya expirado
+    const fechaExp = new Date(invitacion.fecha_expiracion);
+    const now = new Date();
+    
+    if (fechaExp < now) {
+      // Marcar como expirada
+      await database.updateRow({
+        databaseId: appWriteConfig.databaseId,
+        tableId: appWriteConfig.invitacionTableId,
+        rowId: invitacionId,
+        data: { estado: 'expirada' },
+      });
+      throw new Error('Esta invitación ha expirado');
+    }
+    
+    // Agregar al usuario como miembro del grupo
+    const membershipId = ID.unique();
+    await database.createRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.grupoMiembroTableId,
+      rowId: membershipId,
+      data: {
+        group_ref: invitacion.group_ref,
+        user_ref: userId,
+        rol: 'miembro',
+        fecha_union: new Date().toISOString(),
+      },
+    });
+    
+    // Actualizar estado de la invitación
+    await database.updateRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.invitacionTableId,
+      rowId: invitacionId,
+      data: { estado: 'aceptada' },
+    });
+    
+    return true;
+  } catch (e) {
+    console.log('Error accepting invitacion:', e);
+    throw new Error(e as string);
+  }
+};
+
+// Rechazar invitación
+export const rejectInvitacion = async (invitacionId: string) => {
+  try {
+    await database.updateRow({
+      databaseId: appWriteConfig.databaseId,
+      tableId: appWriteConfig.invitacionTableId,
+      rowId: invitacionId,
+      data: { estado: 'rechazada' },
+    });
+    
+    return true;
+  } catch (e) {
+    console.log('Error rejecting invitacion:', e);
     throw new Error(e as string);
   }
 };

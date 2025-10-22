@@ -15,11 +15,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function GruposScreen() {
-  const { userGrupos, fetchAuthenticatedUser } = useAuthBear();
+  const { userGrupos, userInvitaciones, fetchAuthenticatedUser, fetchUserInvitaciones } = useAuthBear();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [gruposWithMembers, setGruposWithMembers] = useState<any[]>([]);
 
+  useEffect(() => {
+    fetchUserInvitaciones();
+  }, []);
+  
   useEffect(() => {
     loadGruposWithMembers();
   }, [userGrupos]);
@@ -173,9 +177,21 @@ export default function GruposScreen() {
       <View className="bg-white px-6 pt-4 pb-6 border-b border-gray-100">
         <View className="flex-row items-center justify-between mb-4">
           <Text className="text-2xl font-bold text-gray-800">Mis Grupos</Text>
-          <View className="bg-primary/10 rounded-full p-2">
-            <MaterialCommunityIcons name="account-group" size={24} color="#FE8C00" />
-          </View>
+          <TouchableOpacity
+            onPress={() => router.push('/(grupos)/invitations-list')}
+            className="relative"
+          >
+            <View className="bg-primary/10 rounded-full p-2">
+              <MaterialCommunityIcons name="email" size={24} color="#FE8C00" />
+            </View>
+            {userInvitaciones.length > 0 && (
+              <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 items-center justify-center">
+                <Text className="text-white text-xs font-bold">
+                  {userInvitaciones.length > 9 ? '9+' : userInvitaciones.length}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Botones de acción rápida */}

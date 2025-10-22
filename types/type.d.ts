@@ -168,3 +168,13 @@ export interface UpdateMemberRoleParams {
   membershipId: string;
   newRole: 'admin' | 'miembro';
 }
+
+export interface Invitacion {
+  $id: string;
+  group_ref: string | Grupo;
+  invited_by_ref: string | User;
+  invited_user_ref: string | User;
+  estado: 'pendiente' | 'aceptada' | 'rechazada' | 'expirada';
+  fecha_expiracion: string;
+  $createdAt?: string;
+}

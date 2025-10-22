@@ -1,41 +1,46 @@
-import CustomButton from '@/components/CustomButton';
+import CustomButton from "@/components/CustomButton";
+import InviteUserModal from "@/components/InviteUserModal";
+
 import {
-    deleteGrupo,
-    getGrupoMembers,
-    updateGrupo,
-    updateMemberRole,
-} from '@/lib/appwrite';
-import useAuthBear from '@/store/auth.store';
-import { Grupo } from '@/types/type';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+  deleteGrupo,
+  getGrupoMembers,
+  updateGrupo,
+  updateMemberRole,
+} from "@/lib/appwrite";
+import useAuthBear from "@/store/auth.store";
+import { Grupo } from "@/types/type";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Keyboard,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManageGrupo() {
   const { grupoId } = useLocalSearchParams<{ grupoId: string }>();
   const { user, userGrupos, fetchAuthenticatedUser } = useAuthBear();
   const [members, setMembers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Estados para edición
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [updatingRoleForMember, setUpdatingRoleForMember] = useState<string | null>(null);
+  const [updatingRoleForMember, setUpdatingRoleForMember] = useState<
+    string | null
+  >(null);
 
   const grupo = userGrupos.find((g: any) => g.$id === grupoId) as Grupo & {
     userRole: string;
@@ -43,20 +48,20 @@ export default function ManageGrupo() {
 
   useEffect(() => {
     if (!grupo) {
-      Alert.alert('Error', 'Grupo no encontrado');
+      Alert.alert("Error", "Grupo no encontrado");
       router.back();
       return;
     }
 
     // Verificar que el usuario sea admin
-    if (grupo.userRole !== 'admin') {
-      Alert.alert('Error', 'No tienes permisos para administrar este grupo');
+    if (grupo.userRole !== "admin") {
+      Alert.alert("Error", "No tienes permisos para administrar este grupo");
       router.back();
       return;
     }
 
     setNombre(grupo.nombre);
-    setDescripcion(grupo.descripcion || '');
+    setDescripcion(grupo.descripcion || "");
     loadMembers();
   }, [grupo]);
 
@@ -67,7 +72,7 @@ export default function ManageGrupo() {
       const fetchedMembers = await getGrupoMembers(grupo.$id);
       setMembers(fetchedMembers);
     } catch (error) {
-      console.log('Error loading members:', error);
+      console.log("Error loading members:", error);
     } finally {
       setIsLoading(false);
     }
@@ -75,22 +80,25 @@ export default function ManageGrupo() {
 
   const handleUpdateInfo = async () => {
     if (!nombre.trim()) {
-      Alert.alert('Error', 'El nombre no puede estar vacío');
+      Alert.alert("Error", "El nombre no puede estar vacío");
       return;
     }
 
     if (nombre.trim().length < 3) {
-      Alert.alert('Error', 'El nombre debe tener al menos 3 caracteres');
+      Alert.alert("Error", "El nombre debe tener al menos 3 caracteres");
       return;
     }
 
     if (nombre.trim().length > 50) {
-      Alert.alert('Error', 'El nombre no puede tener más de 50 caracteres');
+      Alert.alert("Error", "El nombre no puede tener más de 50 caracteres");
       return;
     }
 
     if (descripcion.trim().length > 150) {
-      Alert.alert('Error', 'La descripción no puede tener más de 150 caracteres');
+      Alert.alert(
+        "Error",
+        "La descripción no puede tener más de 150 caracteres"
+      );
       return;
     }
 
@@ -105,9 +113,9 @@ export default function ManageGrupo() {
 
       await fetchAuthenticatedUser();
 
-      Alert.alert('Éxito', 'Información del grupo actualizada');
+      Alert.alert("Éxito", "Información del grupo actualizada");
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo actualizar el grupo');
+      Alert.alert("Error", error.message || "No se pudo actualizar el grupo");
     } finally {
       setIsUpdating(false);
     }
@@ -116,61 +124,68 @@ export default function ManageGrupo() {
   const handleToggleRole = async (member: any) => {
     // No permitir cambiar el rol del creador
     if (member.$id === grupo.created_by) {
-      Alert.alert('Error', 'No puedes cambiar el rol del creador del grupo');
+      Alert.alert("Error", "No puedes cambiar el rol del creador del grupo");
       return;
     }
 
-    const newRole = member.rol === 'admin' ? 'miembro' : 'admin';
-    const actionText = newRole === 'admin' ? 'promover a administrador' : 'quitar como administrador';
+    const newRole = member.rol === "admin" ? "miembro" : "admin";
+    const actionText =
+      newRole === "admin"
+        ? "promover a administrador"
+        : "quitar como administrador";
 
-    Alert.alert(
-      'Cambiar Rol',
-      `¿Deseas ${actionText} a ${member.name}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            setUpdatingRoleForMember(member.membershipId);
-            try {
-              await updateMemberRole({
-                membershipId: member.membershipId,
-                newRole,
-              });
+    Alert.alert("Cambiar Rol", `¿Deseas ${actionText} a ${member.name}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Confirmar",
+        onPress: async () => {
+          setUpdatingRoleForMember(member.membershipId);
+          try {
+            await updateMemberRole({
+              membershipId: member.membershipId,
+              newRole,
+            });
 
-              // Recargar miembros
-              await loadMembers();
-              Alert.alert('Éxito', `Rol actualizado para ${member.name}`);
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'No se pudo actualizar el rol');
-            } finally {
-              setUpdatingRoleForMember(null);
-            }
-          },
+            // Recargar miembros
+            await loadMembers();
+            Alert.alert("Éxito", `Rol actualizado para ${member.name}`);
+          } catch (error: any) {
+            Alert.alert(
+              "Error",
+              error.message || "No se pudo actualizar el rol"
+            );
+          } finally {
+            setUpdatingRoleForMember(null);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleDeleteGroup = () => {
     Alert.alert(
-      'Eliminar Grupo',
+      "Eliminar Grupo",
       `¿Estás seguro que deseas eliminar el grupo "${grupo.nombre}"? Esta acción no se puede deshacer y todos los miembros serán removidos.`,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Eliminar',
-          style: 'destructive',
+          text: "Eliminar",
+          style: "destructive",
           onPress: async () => {
             setIsDeleting(true);
             try {
               await deleteGrupo(grupo.$id, user!.$id);
               await fetchAuthenticatedUser();
-              Alert.alert('Grupo Eliminado', 'El grupo ha sido eliminado exitosamente', [
-                { text: 'OK', onPress: () => router.push('/(tabs)/grupos') },
-              ]);
+              Alert.alert(
+                "Grupo Eliminado",
+                "El grupo ha sido eliminado exitosamente",
+                [{ text: "OK", onPress: () => router.push("/(tabs)/grupos") }]
+              );
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'No se pudo eliminar el grupo');
+              Alert.alert(
+                "Error",
+                error.message || "No se pudo eliminar el grupo"
+              );
               setIsDeleting(false);
             }
           },
@@ -200,12 +215,26 @@ export default function ManageGrupo() {
           <View className="bg-white px-6 pt-4 pb-6 border-b border-gray-100">
             <View className="flex-row items-center justify-between">
               <TouchableOpacity onPress={() => router.back()}>
-                <MaterialCommunityIcons name="arrow-left" size={24} color="#374151" />
+                <MaterialCommunityIcons
+                  name="arrow-left"
+                  size={24}
+                  color="#374151"
+                />
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-gray-800">Administrar Grupo</Text>
+              <Text className="text-xl font-bold text-gray-800">
+                Administrar Grupo
+              </Text>
               <View className="w-6" />
             </View>
           </View>
+
+          <InviteUserModal
+            visible={showInviteModal}
+            onClose={() => setShowInviteModal(false)}
+            groupId={grupo.$id}
+            groupName={grupo.nombre}
+            currentUserId={user!.$id}
+          />
 
           <ScrollView
             className="flex-1"
@@ -235,7 +264,9 @@ export default function ManageGrupo() {
                 </View>
 
                 <View className="mb-4">
-                  <Text className="text-sm font-semibold text-gray-600 mb-2">Descripción</Text>
+                  <Text className="text-sm font-semibold text-gray-600 mb-2">
+                    Descripción
+                  </Text>
                   <TextInput
                     value={descripcion}
                     onChangeText={setDescripcion}
@@ -259,13 +290,31 @@ export default function ManageGrupo() {
 
               {/* Gestión de miembros */}
               <View className="bg-white rounded-2xl p-6 mb-6">
-                <Text className="text-lg font-bold text-gray-800 mb-4">
-                  Gestionar Miembros ({members.length})
-                </Text>
+                <View className="flex-row items-center justify-between mb-4">
+                  <Text className="text-lg font-bold text-gray-800">
+                    Gestionar Miembros ({members.length})
+                  </Text>
+
+                  {/* Botón de invitar */}
+                  <TouchableOpacity
+                    onPress={() => setShowInviteModal(true)}
+                    className="bg-blue-500 rounded-lg px-4 py-2 flex-row items-center"
+                  >
+                    <MaterialCommunityIcons
+                      name="account-plus"
+                      size={18}
+                      color="white"
+                    />
+                    <Text className="text-white font-semibold ml-2 text-sm">
+                      Invitar
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
                 {members.map((member, index) => {
                   const isMemberCreator = member.$id === grupo.created_by;
-                  const isUpdatingThisMember = updatingRoleForMember === member.membershipId;
+                  const isUpdatingThisMember =
+                    updatingRoleForMember === member.membershipId;
 
                   return (
                     <View
@@ -289,13 +338,21 @@ export default function ManageGrupo() {
                           <Text className="text-base font-semibold text-gray-800">
                             {member.name}
                             {member.$id === user?.$id && (
-                              <Text className="text-sm text-gray-500"> (Tú)</Text>
+                              <Text className="text-sm text-gray-500">
+                                {" "}
+                                (Tú)
+                              </Text>
                             )}
                             {isMemberCreator && (
-                              <Text className="text-sm text-primary"> (Creador)</Text>
+                              <Text className="text-sm text-primary">
+                                {" "}
+                                (Creador)
+                              </Text>
                             )}
                           </Text>
-                          <Text className="text-xs text-gray-500">{member.email}</Text>
+                          <Text className="text-xs text-gray-500">
+                            {member.email}
+                          </Text>
                         </View>
                       </View>
 
@@ -303,7 +360,9 @@ export default function ManageGrupo() {
                         <TouchableOpacity
                           onPress={() => handleToggleRole(member)}
                           className={`px-3 py-2 rounded-lg ${
-                            member.rol === 'admin' ? 'bg-primary/10' : 'bg-gray-100'
+                            member.rol === "admin"
+                              ? "bg-primary/10"
+                              : "bg-sky-100"
                           }`}
                           disabled={isUpdatingThisMember}
                         >
@@ -312,10 +371,12 @@ export default function ManageGrupo() {
                           ) : (
                             <Text
                               className={`text-xs font-semibold ${
-                                member.rol === 'admin' ? 'text-primary' : 'text-gray-600'
+                                member.rol === "admin"
+                                  ? "text-primary"
+                                  : "text-blue-400"
                               }`}
                             >
-                              {member.rol === 'admin' ? 'Admin' : 'Miembro'}
+                              {member.rol === "admin" ? "Admin" : "Miembro"}
                             </Text>
                           )}
                         </TouchableOpacity>
@@ -341,12 +402,18 @@ export default function ManageGrupo() {
               {isCreator && (
                 <View className="bg-red-50 rounded-2xl p-6">
                   <View className="flex-row items-center mb-3">
-                    <MaterialCommunityIcons name="alert-circle" size={24} color="#EF4444" />
-                    <Text className="text-lg font-bold text-red-600 ml-2">Zona Peligrosa</Text>
+                    <MaterialCommunityIcons
+                      name="alert-circle"
+                      size={24}
+                      color="#EF4444"
+                    />
+                    <Text className="text-lg font-bold text-red-600 ml-2">
+                      Zona Peligrosa
+                    </Text>
                   </View>
                   <Text className="text-sm text-red-600 mb-4">
-                    Esta acción es permanente y no se puede deshacer. Todos los miembros serán
-                    removidos del grupo.
+                    Esta acción es permanente y no se puede deshacer. Todos los
+                    miembros serán removidos del grupo.
                   </Text>
                   <TouchableOpacity
                     onPress={handleDeleteGroup}
@@ -357,7 +424,9 @@ export default function ManageGrupo() {
                     {isDeleting ? (
                       <ActivityIndicator size="small" color="white" />
                     ) : (
-                      <Text className="text-white font-semibold">Eliminar Grupo</Text>
+                      <Text className="text-white font-semibold">
+                        Eliminar Grupo
+                      </Text>
                     )}
                   </TouchableOpacity>
                 </View>
