@@ -1,4 +1,4 @@
-import { getUserStats, logOut, updateUserProfile, uploadAvatar } from '@/lib/appwrite';
+import { getUserStats, logOut, updateUserProfile, uploadAvatar } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { UserStats } from '@/types/type';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

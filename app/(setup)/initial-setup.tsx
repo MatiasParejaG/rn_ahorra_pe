@@ -1,7 +1,7 @@
 import CurrencySelector from '@/components/CurrencySelector';
 import CustomButton from '@/components/CustomButton';
 import { CURRENCIES } from '@/constants/currencies';
-import { createUserAccount } from '@/lib/appwrite';
+import { createUserAccount } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';

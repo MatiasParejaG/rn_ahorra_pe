@@ -1,4 +1,4 @@
-import { getCurrentUser, getUserAccount, getUserGrupos, getUserInvitaciones, getUserMetas } from '@/lib/appwrite';
+import { getCurrentUser, getUserAccount, getUserGrupos, getUserInvitaciones, getUserMetas } from '@/lib/appwrite/index';
 import { Grupo, Invitacion, Meta, User, UserAccount } from '@/types/type';
 import { create } from 'zustand';
 

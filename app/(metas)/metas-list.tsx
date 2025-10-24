@@ -1,5 +1,5 @@
 import CustomButton from '@/components/CustomButton';
-import { deleteMeta } from '@/lib/appwrite';
+import { deleteMeta } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { Meta } from '@/types/type';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

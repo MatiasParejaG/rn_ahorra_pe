@@ -1,5 +1,5 @@
 import CustomButton from '@/components/CustomButton';
-import { addFundsToMeta } from '@/lib/appwrite';
+import { addFundsToMeta } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';

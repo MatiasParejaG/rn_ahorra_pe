@@ -1,17 +1,17 @@
 import TransactionCard from '@/components/TransactionCard';
-import { getAccountTransactions } from '@/lib/appwrite';
+import { getAccountTransactions } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { Transaction } from '@/types/type';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

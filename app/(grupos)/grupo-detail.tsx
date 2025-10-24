@@ -1,6 +1,10 @@
 import AporteMetaModal from "@/components/AporteMetaModal";
 import InviteUserModal from "@/components/InviteUserModal";
-import { getGrupoMembers, getGrupoMetas, leaveGrupo } from "@/lib/appwrite";
+import {
+  getGrupoMembers,
+  getGrupoMetas,
+  leaveGrupo,
+} from "@/lib/appwrite/index";
 import useAuthBear from "@/store/auth.store";
 import { Grupo, MetaGrupal } from "@/types/type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -105,76 +109,116 @@ export default function GrupoDetail() {
           })
         }
         activeOpacity={0.8}
-        className="bg-white rounded-xl p-4 mb-3"
+        className="bg-gray-50 rounded-xl overflow-hidden mb-3"
         style={{
           elevation: 2,
           shadowColor: "#000",
-          shadowOpacity: 0.1,
+          shadowOpacity: 0.2,
           shadowRadius: 3,
         }}
       >
-        {/* Header */}
-        <View className="flex-row items-start justify-between mb-3">
-          <View className="flex-1 mr-3">
-            <Text className="text-base font-bold text-gray-800 mb-1">
-              {meta.nombre}
-            </Text>
-            {meta.descripcion && (
-              <Text className="text-xs text-gray-500" numberOfLines={2}>
-                {meta.descripcion}
-              </Text>
-            )}
-          </View>
-
-          {meta.estado ? (
-            <View className="bg-green-100 px-2 py-1 rounded-full">
-              <Text className="text-green-700 font-bold text-xs">
-                ✓ Completada
-              </Text>
-            </View>
-          ) : (
-            <View className="bg-blue-100 px-2 py-1 rounded-full">
-              <Text className="text-blue-700 font-bold text-xs">
-                {Math.round(progress)}%
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Progress Bar */}
-        <View className="mb-3">
-          <View className="bg-gray-200 rounded-full h-2 overflow-hidden">
+        {/* Imagen de la meta si existe */}
+        {meta.foto_meta && (
+          <View className="w-full h-32">
+            <Image
+              source={{ uri: meta.foto_meta }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+            {/* Overlay con gradiente para mejor legibilidad */}
             <View
-              className="h-full rounded-full"
+              className="absolute bottom-0 left-0 right-0 h-16"
               style={{
-                width: `${Math.min(progress, 100)}%`,
-                backgroundColor: meta.estado ? "#10B981" : "#4A90E2",
+                backgroundColor: "rgba(0,0,0,0.0)",
               }}
             />
+            {/* Badge de estado sobre la imagen */}
+            <View className="absolute top-2 right-2">
+              {meta.estado ? (
+                <View className="bg-green-500 px-3 py-1 rounded-full">
+                  <Text className="text-white font-bold text-xs">
+                    ✓ Completada
+                  </Text>
+                </View>
+              ) : (
+                <View className="bg-blue-500 px-3 py-1 rounded-full">
+                  <Text className="text-white font-bold text-xs">
+                    {Math.round(progress)}%
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
+        )}
 
-        {/* Footer */}
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-xs text-gray-500">
-              {getCurrencySymbol()} {meta.monto_actual.toFixed(2)} de{" "}
-              {getCurrencySymbol()} {meta.monto_objetivo.toFixed(2)}
-            </Text>
+        <View className="p-4">
+          {/* Header */}
+          <View className="flex-row items-start justify-between mb-3">
+            <View className="flex-1 mr-3">
+              <Text className="text-base font-bold text-gray-800 mb-1">
+                {meta.nombre}
+              </Text>
+              {meta.descripcion && (
+                <Text className="text-xs text-gray-500" numberOfLines={2}>
+                  {meta.descripcion}
+                </Text>
+              )}
+            </View>
+
+            {/* Badge de estado si NO hay imagen */}
+            {!meta.foto_meta &&
+              (meta.estado ? (
+                <View className="bg-green-100 px-2 py-1 rounded-full">
+                  <Text className="text-green-700 font-bold text-xs">
+                    ✓ Completada
+                  </Text>
+                </View>
+              ) : (
+                <View className="bg-blue-100 px-2 py-1 rounded-full">
+                  <Text className="text-blue-700 font-bold text-xs">
+                    {Math.round(progress)}%
+                  </Text>
+                </View>
+              ))}
           </View>
 
-          {!meta.estado && (
-            <TouchableOpacity
-              onPress={(e) => {
-                e.stopPropagation();
-                setSelectedMeta(meta);
-                setShowAporteModal(true);
-              }}
-              className="bg-primary rounded-lg px-4 py-2"
-            >
-              <Text className="text-white font-semibold text-xs">Aportar</Text>
-            </TouchableOpacity>
-          )}
+          {/* Progress Bar */}
+          <View className="mb-3">
+            <View className="bg-gray-200 rounded-full h-2 overflow-hidden">
+              <View
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min(progress, 100)}%`,
+                  backgroundColor: meta.estado ? "#10B981" : "#4A90E2",
+                }}
+              />
+            </View>
+          </View>
+
+          {/* Footer */}
+          <View className="flex-row justify-between items-center">
+            <View>
+              <Text className="text-xs text-gray-500">
+                {getCurrencySymbol()} {meta.monto_actual.toFixed(2)} de{" "}
+                {getCurrencySymbol()} {meta.monto_objetivo.toFixed(2)}
+              </Text>
+            </View>
+
+            {!meta.estado && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setSelectedMeta(meta);
+                  setShowAporteModal(true);
+                }}
+                className="bg-primary rounded-lg px-4 py-2"
+              >
+                <Text className="text-white font-semibold text-xs">
+                  Aportar
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -379,23 +423,47 @@ export default function GrupoDetail() {
             </View>
 
             {/* Metas Grupales */}
-
             <View className="bg-white rounded-2xl p-5 mb-6">
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-lg font-bold text-gray-800">
                   Metas del Grupo ({metasGrupales.length})
                 </Text>
+                {metasGrupales.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(grupos)/metas-grupales-list",
+                        params: {
+                          grupoId: grupo.$id,
+                          grupoNombre: grupo.nombre,
+                          userRole: grupo.userRole,
+                        },
+                      })
+                    }
+                  >
+                    <Text className="text-blue-500 font-semibold text-sm">
+                      Ver todas
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {metasGrupales.length > 0 ? (
                 <>
-                  {metasGrupales.slice(0, 3).map(renderMetaCard)}
+                  {metasGrupales.slice(0, 2).map(renderMetaCard)}
 
-                  {metasGrupales.length > 3 && (
+                  {metasGrupales.length > 2 && (
                     <TouchableOpacity
-                      onPress={() => {
-                        // Navegar a todas las metas TODO
-                      }}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(grupos)/metas-grupales-list",
+                          params: {
+                            grupoId: grupo.$id,
+                            grupoNombre: grupo.nombre,
+                            userRole: grupo.userRole,
+                          },
+                        })
+                      }
                       className="bg-gray-50 rounded-lg py-3 items-center mt-2"
                     >
                       <Text className="text-gray-600 font-semibold text-sm">

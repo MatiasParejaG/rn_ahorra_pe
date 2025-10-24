@@ -1,18 +1,20 @@
 import CustomButton from '@/components/CustomButton';
-import { createMetaGrupal } from '@/lib/appwrite';
+import { createMetaGrupal, uploadMetaGrupalPhoto } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  Image,
+  Keyboard,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,6 +28,7 @@ export default function CreateMetaGrupal() {
   const [descripcion, setDescripcion] = useState('');
   const [montoObjetivo, setMontoObjetivo] = useState('');
   const [fechaObjetivo, setFechaObjetivo] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getCurrencySymbol = () => {
@@ -37,6 +40,38 @@ export default function CreateMetaGrupal() {
                    userAccount.divisa === 'ARS' ? '$' : 'S/';
     
     return symbol;
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert(
+          'Permisos necesarios',
+          'Necesitamos acceso a tus fotos para agregar una imagen a la meta'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (e) {
+      console.log('Error picking image:', e);
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
   };
 
   const handleSubmit = async () => {
@@ -78,7 +113,6 @@ export default function CreateMetaGrupal() {
       return;
     }
 
-    // Validar fecha si se proporcionó
     let fechaObjetivoISO: string | undefined = undefined;
     if (fechaObjetivo.trim()) {
       const fecha = new Date(fechaObjetivo);
@@ -105,6 +139,17 @@ export default function CreateMetaGrupal() {
     setIsSubmitting(true);
 
     try {
+      let fotoUrl: string | undefined = undefined;
+      let fotoFileId: string | undefined = undefined;
+
+      // Subir imagen si se seleccionó una
+      if (selectedImage) {
+        const tempMetaId = `temp_${Date.now()}`;
+        const uploadResult = await uploadMetaGrupalPhoto(selectedImage, tempMetaId);
+        fotoUrl = uploadResult.fileUrl;
+        fotoFileId = uploadResult.fileId;
+      }
+
       await createMetaGrupal({
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
@@ -112,6 +157,8 @@ export default function CreateMetaGrupal() {
         fecha_objetivo: fechaObjetivoISO,
         groupId: grupoId,
         userId: user.$id,
+        ...(fotoUrl && { foto_meta: fotoUrl }),
+        ...(fotoFileId && { foto_meta_file_id: fotoFileId }),
       });
 
       Alert.alert(
@@ -167,6 +214,52 @@ export default function CreateMetaGrupal() {
                 <Text className="text-sm text-gray-500 text-center mt-2 px-4">
                   Todos los miembros de "{grupoNombre}" podrán aportar a esta meta
                 </Text>
+              </View>
+
+              {/* Selector de Imagen */}
+              <View className="bg-white rounded-2xl p-6 mb-6">
+                <Text className="text-sm font-semibold text-gray-600 mb-3">
+                  Imagen de la Meta (Opcional)
+                </Text>
+                
+                {selectedImage ? (
+                  <View className="relative">
+                    <Image
+                      source={{ uri: selectedImage }}
+                      className="w-full h-48 rounded-xl"
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      onPress={handleRemoveImage}
+                      className="absolute top-2 right-2 bg-red-500 rounded-full p-2"
+                      style={{
+                        elevation: 3,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                      }}
+                    >
+                      <MaterialCommunityIcons name="close" size={20} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={handlePickImage}
+                    className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-8 items-center"
+                  >
+                    <MaterialCommunityIcons
+                      name="image-plus"
+                      size={48}
+                      color="#9CA3AF"
+                    />
+                    <Text className="text-gray-600 font-semibold mt-3">
+                      Agregar imagen
+                    </Text>
+                    <Text className="text-gray-400 text-xs mt-1 text-center">
+                      Toca para seleccionar una imagen representativa
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* Nombre de la meta */}

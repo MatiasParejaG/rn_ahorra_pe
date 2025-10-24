@@ -6,7 +6,7 @@ import {
   getGrupoMembers,
   updateGrupo,
   updateMemberRole,
-} from "@/lib/appwrite";
+} from "@/lib/appwrite/index";
 import useAuthBear from "@/store/auth.store";
 import { Grupo } from "@/types/type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";

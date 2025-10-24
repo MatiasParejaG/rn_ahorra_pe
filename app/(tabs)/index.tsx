@@ -3,7 +3,7 @@ import HomeHeader from '@/components/HomeHeader';
 import MetaCard from '@/components/MetaCard';
 import QuickActionButton from '@/components/QuickActionButton';
 import TransactionCard from '@/components/TransactionCard';
-import { getAccountTransactions, logOut } from '@/lib/appwrite';
+import { getAccountTransactions, logOut } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { Transaction } from '@/types/type';
 import { router } from 'expo-router';

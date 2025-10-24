@@ -1,17 +1,17 @@
 import CustomButton from '@/components/CustomButton';
-import { registrarAporteMetaGrupal } from '@/lib/appwrite';
+import { registrarAporteMetaGrupal } from '@/lib/appwrite/index';
 import { MetaGrupal } from '@/types/type';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    Modal,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Alert,
+  Keyboard,
+  Modal,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 
 interface AporteMetaModalProps {

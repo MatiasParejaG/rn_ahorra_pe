@@ -1,18 +1,18 @@
 import CustomButton from '@/components/CustomButton';
-import { createGrupo } from '@/lib/appwrite';
+import { createGrupo } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  Keyboard,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

@@ -1,21 +1,21 @@
 import CustomButton from '@/components/CustomButton';
-import { findGrupoByTag, getGrupoMembers, joinGrupo } from '@/lib/appwrite';
+import { findGrupoByTag, getGrupoMembers, joinGrupo } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { Grupo } from '@/types/type';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Keyboard,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

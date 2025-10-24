@@ -189,6 +189,7 @@ export interface Invitacion {
 }
 
 // Metas Grupales
+// Metas Grupales
 export interface MetaGrupal {
   $id: string;
   meta_grupo_Id: string;
@@ -199,6 +200,8 @@ export interface MetaGrupal {
   fecha_objetivo?: string;
   estado: boolean;
   group_ref: string | Grupo;
+  foto_meta?: string;
+  foto_meta_file_id?: string;
   $createdAt?: string;
 }
 
@@ -217,6 +220,8 @@ export interface CreateMetaGrupalParams {
   fecha_objetivo?: string;
   groupId: string;
   userId: string;
+  foto_meta?: string;
+  foto_meta_file_id?: string; 
 }
 
 export interface RegistrarAporteParams {

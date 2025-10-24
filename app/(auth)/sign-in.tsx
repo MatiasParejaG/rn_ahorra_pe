@@ -1,6 +1,6 @@
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
-import { signIn } from "@/lib/appwrite";
+import { signIn } from "@/lib/appwrite/index";
 import useAuthBear from "@/store/auth.store";
 import { Link, router } from "expo-router";
 import React, { useState } from "react";

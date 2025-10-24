@@ -1,4 +1,4 @@
-import { getGrupoMembers } from '@/lib/appwrite';
+import { getGrupoMembers } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';

@@ -1,18 +1,18 @@
 import CustomButton from '@/components/CustomButton';
-import { createInvitacion, findUserByTag } from '@/lib/appwrite';
+import { createInvitacion, findUserByTag } from '@/lib/appwrite/index';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Keyboard,
-    Modal,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  Modal,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 
 interface InviteUserModalProps {

@@ -1,7 +1,7 @@
 import CategorySelector from '@/components/CategorySelector';
 import CustomButton from '@/components/CustomButton';
 import { DEFAULT_CATEGORIES } from '@/constants/categories';
-import { createTransaction } from '@/lib/appwrite';
+import { createTransaction } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
