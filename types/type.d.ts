@@ -3,7 +3,6 @@ export interface Category {
     description: string;
 }
 
-// Tipos existentes
 export interface User {
   $id: string;
   name: string;
@@ -138,15 +137,15 @@ export interface Grupo {
   nombre: string;
   descripcion?: string;
   tag: string;
-  created_by: string | User; // Relationship
+  created_by: string | User; 
   foto_bg?: string;
   $createdAt?: string;
 }
 
 export interface GrupoMiembro {
   $id: string;
-  group_ref: string | Grupo; // Relationship
-  user_ref: string | User; // Relationship
+  group_ref: string | Grupo; 
+  user_ref: string | User; 
   rol: 'admin' | 'miembro';
   fecha_union: string;
 }
@@ -189,7 +188,6 @@ export interface Invitacion {
 }
 
 // Metas Grupales
-// Metas Grupales
 export interface MetaGrupal {
   $id: string;
   meta_grupo_Id: string;
@@ -229,4 +227,13 @@ export interface RegistrarAporteParams {
   userId: string;
   monto: number;
   cuentaId: string;
+}
+
+export interface Alcancia {
+  $id: string;
+  is_claimed: boolean;
+  name?: string;
+  fecha_activacion?: string;
+  owner_id?: string | User;
+  $createdAt?: string;
 }

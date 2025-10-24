@@ -58,10 +58,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name='aprender'
+        name='alcancia'
         options={{
-          title: 'Aprender',
-          tabBarIcon: ({ focused }) => <TabBarIcon title="Aprender" icon={icons.aprender} focused = {focused}/>
+          title: 'Alcancía',
+          tabBarIcon: ({ focused }) => <TabBarIcon title="Alcancía" icon={icons.llama} focused = {focused}/>
         }}
       />
 

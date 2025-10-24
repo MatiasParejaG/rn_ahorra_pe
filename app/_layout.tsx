@@ -3,7 +3,6 @@ import { Stack } from "expo-router";
 import { useEffect } from "react";
 import './globals.css';
 
-
 export default function RootLayout() {
   const { isLoading, fetchAuthenticatedUser } = useAuthBear();
   
@@ -37,6 +36,11 @@ export default function RootLayout() {
   
   <Stack.Screen
     name="(grupos)"
+    options={{ headerShown: false }}
+  />
+
+  <Stack.Screen
+    name="(alcancia)"
     options={{ headerShown: false }}
   />
   </Stack>

@@ -60,3 +60,11 @@ export {
     updateMetaGrupalPhoto, uploadAvatar, uploadMetaGrupalPhoto
 } from './storage.service';
 
+// Alcancia Service
+export {
+    claimAlcancia,
+    getAlcanciaById,
+    getUserAlcancia,
+    unclaimAlcancia,
+    updateAlcanciaName
+} from './alcancia.service';

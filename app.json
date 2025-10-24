@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mapg.ahorrape",
+      "infoPlist": {
+        "NSCameraUsageDescription": "AhorraPe necesita acceso a la cámara para escanear códigos QR de alcancías.",
+        "NSPhotoLibraryUsageDescription": "AhorraPe necesita acceso a tus fotos para actualizar tu avatar"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +24,29 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mapg.ahorrape",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "ahorrapeapp",
+              "host": "*"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -46,7 +73,14 @@
           "photosPermission": "La aplicación necesita acceso a tus fotos para actualizar tu avatar",
           "cameraPermission": "La aplicación necesita acceso a tu cámara para tomar fotos"
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AhorraPe necesita acceso a la cámara para escanear códigos QR de alcancías."
+        }
+      ],
+      "expo-barcode-scanner"
     ],
     "experiments": {
       "typedRoutes": true,

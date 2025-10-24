@@ -1,5 +1,5 @@
-import { getCurrentUser, getUserAccount, getUserGrupos, getUserInvitaciones, getUserMetas } from '@/lib/appwrite/index';
-import { Grupo, Invitacion, Meta, User, UserAccount } from '@/types/type';
+import { getCurrentUser, getUserAccount, getUserAlcancia, getUserGrupos, getUserInvitaciones, getUserMetas } from '@/lib/appwrite/index';
+import { Alcancia, Grupo, Invitacion, Meta, User, UserAccount } from '@/types/type';
 import { create } from 'zustand';
 
 type AuthState = {
@@ -9,6 +9,7 @@ type AuthState = {
     userMetas: Meta[];
     userGrupos: Grupo[];
     userInvitaciones: Invitacion[];
+    userAlcancia: Alcancia | null;
     isLoading: boolean;
 
     setIsAuthenticated: (value: boolean) => void;
@@ -17,10 +18,12 @@ type AuthState = {
     setUserMetas: (metas: Meta[]) => void;
     setUserGrupos: (grupos: Grupo[]) => void;
     setUserInvitaciones: (invitaciones: Invitacion[]) => void;
+    setUserAlcancia: (alcancia: Alcancia | null) => void;
     setLoading: (loading: boolean) => void;
 
     fetchAuthenticatedUser: () => Promise<void>;
     fetchUserInvitaciones: () => Promise<void>;
+    fetchUserAlcancia: () => Promise<void>;
     logout: () => void;
 }
 
@@ -31,6 +34,7 @@ const useAuthBear = create<AuthState>((set, get) => ({
   userMetas: [],
   userGrupos: [],
   userInvitaciones: [],
+  userAlcancia: null,
   isLoading: true,
 
   setIsAuthenticated: (value) => set({ isAuthenticated: value}),
@@ -39,6 +43,7 @@ const useAuthBear = create<AuthState>((set, get) => ({
   setUserMetas: (metas) => set({ userMetas: metas }),
   setUserGrupos: (grupos) => set({ userGrupos: grupos }),
   setUserInvitaciones: (invitaciones) => set({ userInvitaciones: invitaciones }),
+  setUserAlcancia: (alcancia) => set({ userAlcancia: alcancia }),
   setLoading: (value) => set({ isLoading: value}),
 
   fetchUserInvitaciones: async () => {
@@ -54,6 +59,19 @@ const useAuthBear = create<AuthState>((set, get) => ({
     }
   },
 
+  fetchUserAlcancia: async () => {
+    const { user } = get();
+    if (!user?.$id) return;
+    
+    try {
+      const alcancia = await getUserAlcancia(user.$id);
+      set({ userAlcancia: alcancia as Alcancia | null });
+    } catch (e) {
+      console.log('Error fetching alcancia:', e);
+      set({ userAlcancia: null });
+    }
+  },
+
   fetchAuthenticatedUser: async() => {
     set({isLoading: true});
 
@@ -63,7 +81,7 @@ const useAuthBear = create<AuthState>((set, get) => ({
         if(user) {
           set({ isAuthenticated: true, user: user as User });
           
-          // Si el usuario completó el setup, obtener su cuenta, metas, grupos e invitaciones
+          // Si el usuario completó el setup, obtener su cuenta, metas, grupos, invitaciones y alcancía
           if(user.initial_setup) {
             const account = await getUserAccount(user.$id);
             set({ userAccount: account as UserAccount });
@@ -79,6 +97,10 @@ const useAuthBear = create<AuthState>((set, get) => ({
             // Obtener las invitaciones del usuario
             const invitaciones = await getUserInvitaciones(user.$id);
             set({ userInvitaciones: invitaciones as Invitacion[] });
+
+            // Obtener la alcancía del usuario
+            const alcancia = await getUserAlcancia(user.$id);
+            set({ userAlcancia: alcancia as Alcancia | null });
           }
         } else {
           set({ 
@@ -87,7 +109,8 @@ const useAuthBear = create<AuthState>((set, get) => ({
             userAccount: null, 
             userMetas: [], 
             userGrupos: [], 
-            userInvitaciones: [] 
+            userInvitaciones: [],
+            userAlcancia: null,
           });
         }
     } catch (e) {
@@ -98,7 +121,8 @@ const useAuthBear = create<AuthState>((set, get) => ({
           userAccount: null, 
           userMetas: [], 
           userGrupos: [], 
-          userInvitaciones: [] 
+          userInvitaciones: [],
+          userAlcancia: null,
         });
     } finally {
         set({ isLoading: false });
@@ -112,7 +136,8 @@ const useAuthBear = create<AuthState>((set, get) => ({
       userAccount: null, 
       userMetas: [], 
       userGrupos: [], 
-      userInvitaciones: [] 
+      userInvitaciones: [],
+      userAlcancia: null,
     });
   }
 }))

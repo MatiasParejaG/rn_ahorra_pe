@@ -14,6 +14,7 @@ export const appWriteConfig = {
   storageBucketId: process.env.EXPO_PUBLIC_APPWRITE_STORAGE_BUCKET_ID!,
   metaGrupoTableId: process.env.EXPO_PUBLIC_APPWRITE_META_GRUPO_TABLE_ID!,
   aporteGrupoTableId: process.env.EXPO_PUBLIC_APPWRITE_APORTE_GRUPO_TABLE_ID!,
+  alcanciaTableId: process.env.EXPO_PUBLIC_APPWRITE_ALCANCIA_TABLE_ID!,
   platform: "com.mapg.ahorrape",
 };
 
