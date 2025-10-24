@@ -1,7 +1,8 @@
+import AporteMetaModal from "@/components/AporteMetaModal";
 import InviteUserModal from "@/components/InviteUserModal";
-import { getGrupoMembers, leaveGrupo } from "@/lib/appwrite";
+import { getGrupoMembers, getGrupoMetas, leaveGrupo } from "@/lib/appwrite";
 import useAuthBear from "@/store/auth.store";
-import { Grupo } from "@/types/type";
+import { Grupo, MetaGrupal } from "@/types/type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,12 +22,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function GrupoDetail() {
   const { grupoId } = useLocalSearchParams<{ grupoId: string }>();
-  const { user, userGrupos, fetchAuthenticatedUser } = useAuthBear();
+  const { user, userAccount, userGrupos, fetchAuthenticatedUser } =
+    useAuthBear();
   const [members, setMembers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [metasGrupales, setMetasGrupales] = useState<MetaGrupal[]>([]);
+  const [selectedMeta, setSelectedMeta] = useState<MetaGrupal | null>(null);
+  const [showAporteModal, setShowAporteModal] = useState(false);
 
   const grupo = userGrupos.find((g: any) => g.$id === grupoId) as Grupo & {
     userRole: string;
@@ -41,7 +46,25 @@ export default function GrupoDetail() {
     }
 
     loadMembers();
+    loadMetasGrupales();
   }, [grupo]);
+
+  const getCurrencySymbol = () => {
+    if (!userAccount) return "S/";
+
+    const symbol =
+      userAccount.divisa === "PEN"
+        ? "S/"
+        : userAccount.divisa === "USD"
+          ? "$"
+          : userAccount.divisa === "EUR"
+            ? "€"
+            : userAccount.divisa === "ARS"
+              ? "$"
+              : "S/";
+
+    return symbol;
+  };
 
   const loadMembers = async () => {
     if (!grupo) return;
@@ -57,9 +80,110 @@ export default function GrupoDetail() {
     }
   };
 
+  const loadMetasGrupales = async () => {
+    if (!grupo) return;
+
+    try {
+      const metas = await getGrupoMetas(grupo.$id);
+      setMetasGrupales(metas as MetaGrupal[]);
+    } catch (error) {
+      console.log("Error loading metas grupales:", error);
+    }
+  };
+
+  const renderMetaCard = (meta: MetaGrupal) => {
+    const progress = (meta.monto_actual / meta.monto_objetivo) * 100;
+    const montoRestante = meta.monto_objetivo - meta.monto_actual;
+
+    return (
+      <TouchableOpacity
+        key={meta.$id}
+        onPress={() =>
+          router.push({
+            pathname: "/(grupos)/meta-grupal-detail",
+            params: { metaId: meta.$id },
+          })
+        }
+        activeOpacity={0.8}
+        className="bg-white rounded-xl p-4 mb-3"
+        style={{
+          elevation: 2,
+          shadowColor: "#000",
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+        }}
+      >
+        {/* Header */}
+        <View className="flex-row items-start justify-between mb-3">
+          <View className="flex-1 mr-3">
+            <Text className="text-base font-bold text-gray-800 mb-1">
+              {meta.nombre}
+            </Text>
+            {meta.descripcion && (
+              <Text className="text-xs text-gray-500" numberOfLines={2}>
+                {meta.descripcion}
+              </Text>
+            )}
+          </View>
+
+          {meta.estado ? (
+            <View className="bg-green-100 px-2 py-1 rounded-full">
+              <Text className="text-green-700 font-bold text-xs">
+                ✓ Completada
+              </Text>
+            </View>
+          ) : (
+            <View className="bg-blue-100 px-2 py-1 rounded-full">
+              <Text className="text-blue-700 font-bold text-xs">
+                {Math.round(progress)}%
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Progress Bar */}
+        <View className="mb-3">
+          <View className="bg-gray-200 rounded-full h-2 overflow-hidden">
+            <View
+              className="h-full rounded-full"
+              style={{
+                width: `${Math.min(progress, 100)}%`,
+                backgroundColor: meta.estado ? "#10B981" : "#4A90E2",
+              }}
+            />
+          </View>
+        </View>
+
+        {/* Footer */}
+        <View className="flex-row justify-between items-center">
+          <View>
+            <Text className="text-xs text-gray-500">
+              {getCurrencySymbol()} {meta.monto_actual.toFixed(2)} de{" "}
+              {getCurrencySymbol()} {meta.monto_objetivo.toFixed(2)}
+            </Text>
+          </View>
+
+          {!meta.estado && (
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                setSelectedMeta(meta);
+                setShowAporteModal(true);
+              }}
+              className="bg-primary rounded-lg px-4 py-2"
+            >
+              <Text className="text-white font-semibold text-xs">Aportar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   const handleRefresh = () => {
     setIsRefreshing(true);
     loadMembers();
+    loadMetasGrupales();
     fetchAuthenticatedUser();
   };
 
@@ -254,6 +378,51 @@ export default function GrupoDetail() {
               </View>
             </View>
 
+            {/* Metas Grupales */}
+
+            <View className="bg-white rounded-2xl p-5 mb-6">
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-lg font-bold text-gray-800">
+                  Metas del Grupo ({metasGrupales.length})
+                </Text>
+              </View>
+
+              {metasGrupales.length > 0 ? (
+                <>
+                  {metasGrupales.slice(0, 3).map(renderMetaCard)}
+
+                  {metasGrupales.length > 3 && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        // Navegar a todas las metas TODO
+                      }}
+                      className="bg-gray-50 rounded-lg py-3 items-center mt-2"
+                    >
+                      <Text className="text-gray-600 font-semibold text-sm">
+                        Ver todas las metas ({metasGrupales.length})
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              ) : (
+                <View className="items-center py-6">
+                  <MaterialCommunityIcons
+                    name="target-account"
+                    size={48}
+                    color="#9CA3AF"
+                  />
+                  <Text className="text-gray-500 mt-2 text-center">
+                    Aún no hay metas grupales
+                  </Text>
+                  {isAdmin && (
+                    <Text className="text-xs text-gray-400 text-center mt-1">
+                      Los admins pueden crear metas desde "Administrar Grupo"
+                    </Text>
+                  )}
+                </View>
+              )}
+            </View>
+
             {/* Miembros */}
             <View className="bg-white rounded-2xl p-5 mb-6">
               <View className="flex-row items-center justify-between mb-4">
@@ -377,6 +546,25 @@ export default function GrupoDetail() {
             </View>
           </View>
         </ScrollView>
+      )}
+      {/* Modal de Aporte */}
+      {selectedMeta && userAccount && (
+        <AporteMetaModal
+          visible={showAporteModal}
+          onClose={() => {
+            setShowAporteModal(false);
+            setSelectedMeta(null);
+          }}
+          meta={selectedMeta}
+          userId={user!.$id}
+          cuentaId={userAccount.$id}
+          saldoDisponible={userAccount.saldo_actual}
+          currencySymbol={getCurrencySymbol()}
+          onSuccess={() => {
+            loadMetasGrupales();
+            fetchAuthenticatedUser();
+          }}
+        />
       )}
     </SafeAreaView>
   );

@@ -187,3 +187,41 @@ export interface Invitacion {
   fecha_expiracion: string;
   $createdAt?: string;
 }
+
+// Metas Grupales
+export interface MetaGrupal {
+  $id: string;
+  meta_grupo_Id: string;
+  nombre: string;
+  descripcion?: string;
+  monto_objetivo: number;
+  monto_actual: number;
+  fecha_objetivo?: string;
+  estado: boolean;
+  group_ref: string | Grupo;
+  $createdAt?: string;
+}
+
+export interface AporteGrupo {
+  $id: string;
+  meta_grupo_ref: string | MetaGrupal;
+  usuario_ref: string | User;
+  monto: number;
+  $createdAt?: string;
+}
+
+export interface CreateMetaGrupalParams {
+  nombre: string;
+  descripcion?: string;
+  monto_objetivo: number;
+  fecha_objetivo?: string;
+  groupId: string;
+  userId: string;
+}
+
+export interface RegistrarAporteParams {
+  metaId: string;
+  userId: string;
+  monto: number;
+  cuentaId: string;
+}

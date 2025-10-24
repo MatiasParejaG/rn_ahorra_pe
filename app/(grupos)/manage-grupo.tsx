@@ -288,6 +288,48 @@ export default function ManageGrupo() {
                 />
               </View>
 
+              {/* Gestión de Metas Grupales */}
+              <View className="bg-white rounded-2xl p-6 mb-6">
+                <Text className="text-lg font-bold text-gray-800 mb-4">
+                  Metas Grupales
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(grupos)/create-meta-grupal",
+                      params: {
+                        grupoId: grupo.$id,
+                        grupoNombre: grupo.nombre,
+                      },
+                    })
+                  }
+                  className="bg-primary rounded-xl py-3 flex-row items-center justify-center"
+                >
+                  <MaterialCommunityIcons
+                    name="plus-circle"
+                    size={20}
+                    color="white"
+                  />
+                  <Text className="text-white font-semibold ml-2">
+                    Crear Meta Grupal
+                  </Text>
+                </TouchableOpacity>
+
+                <View className="bg-blue-50 rounded-xl p-3 flex-row mt-4">
+                  <MaterialCommunityIcons
+                    name="information"
+                    size={20}
+                    color="#3B82F6"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text className="flex-1 text-xs text-blue-700">
+                    Las metas grupales permiten que todos los miembros aporten
+                    para alcanzar un objetivo común
+                  </Text>
+                </View>
+              </View>
+
               {/* Gestión de miembros */}
               <View className="bg-white rounded-2xl p-6 mb-6">
                 <View className="flex-row items-center justify-between mb-4">

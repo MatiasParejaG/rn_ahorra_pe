@@ -303,7 +303,7 @@ export default function Perfil() {
           {/* Avatar */}
           <View className="items-center mb-8">
             <View className="relative">
-              <View className="w-36 h-36 rounded-full bg-blue-400 items-center justify-center overflow-hidden">
+              <View className="w-36 h-36 rounded-full bg-white items-center justify-center overflow-hidden">
                 {isUploadingImage ? (
                   <ActivityIndicator size="large" color="white" />
                 ) : user.avatar ? (

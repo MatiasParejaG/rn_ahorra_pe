@@ -22,6 +22,8 @@ export default function GruposLayout() {
       <Stack.Screen name="grupo-detail" />
       <Stack.Screen name="manage-grupo" />
       <Stack.Screen name="invitations-list" />
+      <Stack.Screen name="create-meta-grupal" />
+      <Stack.Screen name="meta-grupal-detail" />
     </Stack>
   );
 }
