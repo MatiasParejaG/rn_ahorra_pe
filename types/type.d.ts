@@ -49,6 +49,9 @@ export interface Meta {
   fecha_objetivo?: string;
   estado: boolean;
   user_ref: string;
+  foto_meta?: string;
+  foto_meta_file_id?: string;
+  $createdAt?: string;
 }
 
 export interface LocalCategory {
@@ -77,6 +80,12 @@ interface CustomButtonProps {
     leftIcon?: React.ReactNode;
     textStyle?: string;
     isLoading?: boolean;
+}
+
+interface DateInputProps {
+  placeholder?: string;
+  title?: string;
+  onChangeText?: (text: string) => void;
 }
 
 interface CustomHeaderProps {
@@ -122,6 +131,8 @@ interface CreateMetaParams {
   monto_objetivo: number;
   fecha_objetivo?: string;
   userId: string;
+  foto_meta?: string;
+  foto_meta_file_id?: string;
 }
 
 interface AddFundsToMetaParams {
@@ -138,7 +149,8 @@ export interface Grupo {
   descripcion?: string;
   tag: string;
   created_by: string | User; 
-  foto_bg?: string;
+  foto_grupo?: string;
+  foto_grupo_file_id?: string;
   $createdAt?: string;
 }
 
@@ -155,6 +167,8 @@ export interface CreateGrupoParams {
   nombre: string;
   descripcion?: string;
   userId: string;
+  foto_grupo?: string;
+  foto_grupo_file_id?: string;
 }
 
 // Params para unirse a un grupo
@@ -168,7 +182,8 @@ export interface UpdateGrupoParams {
   groupId: string;
   nombre?: string;
   descripcion?: string;
-  foto_bg?: string;
+  foto_grupo?: string;
+  foto_grupo_file_id?: string;
 }
 
 // Params para actualizar rol de miembro

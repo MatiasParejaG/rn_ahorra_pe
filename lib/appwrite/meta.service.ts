@@ -10,23 +10,34 @@ export const createMeta = async ({
   monto_objetivo,
   fecha_objetivo,
   userId,
+  foto_meta,
+  foto_meta_file_id,
 }: CreateMetaParams) => {
   try {
     const metaId = ID.unique();
+
+    const metaData: any = {
+      meta_id: metaId,
+      nombre: nombre.trim(),
+      monto_objetivo: monto_objetivo,
+      monto_actual: 0,
+      fecha_objetivo: fecha_objetivo || null,
+      estado: false,
+      user_ref: userId,
+    }
+
+    if(foto_meta) {
+      metaData.foto_meta = foto_meta;
+    }
+    if(foto_meta_file_id) {
+      metaData.foto_meta_file_id = foto_meta_file_id;
+    }
 
     const newMeta = await database.createRow({
       databaseId: appWriteConfig.databaseId,
       tableId: appWriteConfig.metaTableId,
       rowId: metaId,
-      data: {
-        meta_id: metaId,
-        nombre,
-        monto_objetivo,
-        monto_actual: 0,
-        fecha_objetivo: fecha_objetivo || null,
-        estado: false,
-        user_ref: userId,
-      },
+      data: metaData,
     });
 
     return newMeta;

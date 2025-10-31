@@ -97,7 +97,7 @@ export default function JoinGrupo() {
       <View className="flex-row flex-wrap gap-2">
         {visibleMembers.map((member, index) => (
           <View key={index} className="items-center">
-            <View className="w-12 h-12 rounded-full bg-blue-400 items-center justify-center border-2 border-white">
+            <View className="w-12 h-12 rounded-full bg-white items-center justify-center border-2 border-white">
               {member.avatar ? (
                 <Image source={{ uri: member.avatar }} className="w-full h-full rounded-full" />
               ) : (
@@ -206,14 +206,14 @@ export default function JoinGrupo() {
 
                   {/* Header del grupo */}
                   <View
-                    className="h-24 rounded-xl mb-4 overflow-hidden"
+                    className={`${foundGrupo.foto_grupo ? 'h-32' : 'h-24'} rounded-xl mb-4 overflow-hidden`}
                     style={{
-                      backgroundColor: foundGrupo.foto_bg ? 'transparent' : '#4A90E2',
+                      backgroundColor: foundGrupo.foto_grupo ? 'transparent' : '#4A90E2',
                     }}
                   >
-                    {foundGrupo.foto_bg ? (
+                    {foundGrupo.foto_grupo ? (
                       <Image
-                        source={{ uri: foundGrupo.foto_bg }}
+                        source={{ uri: foundGrupo.foto_grupo }}
                         className="w-full h-full"
                         resizeMode="cover"
                       />

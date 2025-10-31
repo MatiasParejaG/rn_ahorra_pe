@@ -13,7 +13,7 @@ export default function BalanceCard({ balance, percentageChange }: BalanceCardPr
   return (
     <View className="bg-gradient-to-r rounded-3xl p-5 overflow-hidden"
           style={{
-            backgroundColor: '#4A90E2',
+            backgroundColor: '#ff921b',
             shadowColor: '#000',
             shadowOpacity: 0.15,
             shadowRadius: 8,
@@ -32,7 +32,7 @@ export default function BalanceCard({ balance, percentageChange }: BalanceCardPr
       <Text className="text-white text-3xl font-bold mb-1">
         {isVisible ? balance : '••••••'}
       </Text>
-      <Text className="text-blue-100 text-xs">↑ {percentageChange}</Text>
+      <Text className="text-orange-50 text-xs">↑ {percentageChange}</Text>
     </View>
   );
 }

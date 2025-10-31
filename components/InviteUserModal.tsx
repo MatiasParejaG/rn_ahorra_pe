@@ -194,7 +194,7 @@ export default function InviteUserModal({
                   </View>
 
                   <View className="flex-row items-center">
-                    <View className="w-14 h-14 rounded-full bg-blue-400 items-center justify-center">
+                    <View className="w-14 h-14 rounded-full bg-white items-center justify-center">
                       {foundUser.avatar ? (
                         <Image
                           source={{ uri: foundUser.avatar }}

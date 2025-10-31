@@ -100,8 +100,8 @@ export default function Index() {
     router.push('/(tabs)/transaction-list');
   };
 
-  // Mostrar solo las primeras 2 metas activas
-  const displayedMetas = userMetas.filter(m => !m.estado).slice(0, 2);
+  // Mostrar solo las primeras 3 metas activas
+  const displayedMetas = userMetas.filter(m => !m.estado).slice(0, 3);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -183,12 +183,12 @@ export default function Index() {
               return (
                 <MetaCard
                   key={meta.$id}
-                  icon="gamepad"
+                  image={meta.foto_meta}
                   title={meta.nombre}
                   progress={Math.round(progress)}
                   saved={meta.monto_actual}
                   total={meta.monto_objetivo}
-                  progressColor="#4A90E2"
+                  progressColor="#29da00"
                   currencySymbol={getCurrencySymbol()}
                 />
               );

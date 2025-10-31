@@ -154,13 +154,7 @@ export default function MetaGrupalDetail() {
                   className="w-full h-full"
                   resizeMode="cover"
                 />
-                {/* Overlay con gradiente */}
-                <View
-                  className="absolute bottom-0 left-0 right-0 h-24"
-                  style={{
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                  }}
-                />
+
                 {/* Badge de estado sobre la imagen */}
                 {meta.estado && (
                   <View className="absolute top-4 right-4">

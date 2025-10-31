@@ -56,8 +56,7 @@ export {
 
 // Storage Service
 export {
-    deleteAvatar, deleteMetaGrupalPhoto,
-    updateMetaGrupalPhoto, uploadAvatar, uploadMetaGrupalPhoto
+    deletePhoto, updateGrupoPhoto, updateMetaGrupalPhoto, updateMetaPhoto, uploadAvatar, uploadGrupoPhoto, uploadMetaGrupalPhoto
 } from './storage.service';
 
 // Alcancia Service
@@ -68,3 +67,4 @@ export {
     unclaimAlcancia,
     updateAlcanciaName
 } from './alcancia.service';
+

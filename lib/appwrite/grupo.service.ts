@@ -1,8 +1,8 @@
 import {
-    CreateGrupoParams,
-    JoinGrupoParams,
-    UpdateGrupoParams,
-    UpdateMemberRoleParams,
+  CreateGrupoParams,
+  JoinGrupoParams,
+  UpdateGrupoParams,
+  UpdateMemberRoleParams,
 } from '@/types/type';
 import { ID, Query } from 'react-native-appwrite';
 import { appWriteConfig, database } from './config';
@@ -46,23 +46,37 @@ export const createGrupo = async ({
   nombre,
   descripcion,
   userId,
+  foto_grupo,
+  foto_grupo_file_id,
 }: CreateGrupoParams) => {
   try {
     const groupId = ID.unique();
     const tag = await generateUniqueTag();
 
+    // Preparar datos
+
+    const grupoData: any = {
+      group_Id: groupId,
+      nombre: nombre.trim(),
+      descripcion:descripcion?.trim() || '',
+      tag: tag,
+      created_by: userId,
+    }
+
+    if (foto_grupo) {
+      grupoData.foto_grupo = foto_grupo;
+    }
+
+    if (foto_grupo_file_id) {
+      grupoData.foto_grupo_file_id = foto_grupo_file_id;
+    }
+        
     // Crear el grupo
     const newGrupo = await database.createRow({
       databaseId: appWriteConfig.databaseId,
       tableId: appWriteConfig.grupoTableId,
       rowId: groupId,
-      data: {
-        group_Id: groupId,
-        nombre: nombre.trim(),
-        descripcion: descripcion?.trim() || '',
-        tag: tag,
-        created_by: userId,
-      },
+      data: grupoData,
     });
 
     // Agregar al creador como miembro con rol admin
@@ -243,14 +257,16 @@ export const updateGrupo = async ({
   groupId,
   nombre,
   descripcion,
-  foto_bg,
+  foto_grupo,
+  foto_grupo_file_id,
 }: UpdateGrupoParams) => {
   try {
     const updateData: any = {};
 
     if (nombre !== undefined) updateData.nombre = nombre.trim();
     if (descripcion !== undefined) updateData.descripcion = descripcion.trim();
-    if (foto_bg !== undefined) updateData.foto_bg = foto_bg;
+    if (foto_grupo !== undefined) updateData.foto_grupo = foto_grupo;
+    if (foto_grupo_file_id !== undefined) updateData.foto_grupo_file_id = foto_grupo_file_id;
 
     const updatedGrupo = await database.updateRow({
       databaseId: appWriteConfig.databaseId,

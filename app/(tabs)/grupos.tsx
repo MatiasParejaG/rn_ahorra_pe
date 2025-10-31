@@ -124,13 +124,13 @@ export default function GruposScreen() {
       >
         {/* Header con foto o color de fondo */}
         <View
-          className="h-24 rounded-xl mb-4 overflow-hidden"
+          className={`${grupo.foto_grupo ? 'h-32' : 'h-24'} rounded-xl mb-4 overflow-hidden`}
           style={{
-            backgroundColor: grupo.foto_bg ? 'transparent' : '#4A90E2',
+            backgroundColor: grupo.foto_grupo ? 'transparent' : '#4A90E2',
           }}
         >
-          {grupo.foto_bg ? (
-            <Image source={{ uri: grupo.foto_bg }} className="w-full h-full" resizeMode="cover" />
+          {grupo.foto_grupo !== null ? (
+            <Image source={{ uri: grupo.foto_grupo }} className="w-full h-full" resizeMode="cover" />
           ) : (
             <View className="w-full h-full items-center justify-center">
               <MaterialCommunityIcons name="account-group" size={40} color="white" />

@@ -135,8 +135,8 @@ export const updateUserProfile = async ({
     
     // Si se actualizó el avatar y hay uno anterior, eliminarlo
     if (avatarUrl && oldAvatarFileId) {
-      const { deleteAvatar } = await import('./storage.service');
-      await deleteAvatar(oldAvatarFileId);
+      const { deletePhoto } = await import('./storage.service');
+      await deletePhoto(oldAvatarFileId);
     }
     
     return updatedUser;

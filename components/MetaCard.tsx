@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 
 interface MetaCardProps {
-  icon: 'bike' | 'gamepad';
+  image?: string | undefined;
   title: string;
   progress: number;
   saved: number;
@@ -12,7 +12,7 @@ interface MetaCardProps {
 }
 
 export default function MetaCard({
-  icon,
+  image,
   title,
   progress,
   saved,
@@ -20,17 +20,22 @@ export default function MetaCard({
   progressColor,
   currencySymbol = 'S/',
 }: MetaCardProps) {
-  const getIcon = () => {
-    if (icon === 'bike') {
+  const getPreview = () => {    
+    if (image === null) {
       return (
         <View className="bg-blue-100 rounded-lg p-2">
-          <MaterialCommunityIcons name="bike" size={20} color="#2196F3" />
+          <MaterialCommunityIcons name="hand-coin" size={28} color="#2196F3" />
         </View>
       );
     }
+
     return (
-      <View className="bg-pink-100 rounded-lg p-2">
-        <MaterialCommunityIcons name="controller-classic" size={20} color="#E91E63" />
+      <View className="bg-pink-100 rounded-lg overflow-hidden" style={{ width: 44, height: 44 }}>
+        <Image 
+          source={{ uri: image }}
+          style={{ width: 44, height: 44 }}
+          resizeMode="cover"
+        />
       </View>
     );
   };
@@ -47,7 +52,7 @@ export default function MetaCard({
     >
       <View className="flex-row items-start justify-between mb-3">
         <View className="flex-row items-center flex-1">
-          {getIcon()}
+          {getPreview()}
           <View className="flex-1 ml-3">
             <Text className="text-gray-800 font-semibold text-base">{title}</Text>
             <Text className="text-gray-500 text-xs">Meta: {currencySymbol} {total.toFixed(2)}</Text>
@@ -57,7 +62,7 @@ export default function MetaCard({
       </View>
 
       <View className="mb-3">
-        <View className="bg-gray-200 rounded-full h-2 overflow-hidden">
+        <View className="bg-green-100 rounded-full h-2 overflow-hidden">
           <View
             className="h-full rounded-full"
             style={{ width: `${progress}%`, backgroundColor: progressColor }}

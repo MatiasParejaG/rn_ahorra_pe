@@ -115,14 +115,14 @@ export default function InvitationsList() {
       >
         {/* Header del grupo */}
         <View
-          className="h-20 rounded-xl mb-4 overflow-hidden"
+          className={`${invitacion.grupo?.foto_grupo ? 'h-32' : 'h-24'} rounded-xl mb-4 overflow-hidden`}
           style={{
-            backgroundColor: invitacion.grupo?.foto_bg ? 'transparent' : '#4A90E2',
+            backgroundColor: invitacion.grupo?.foto_grupo ? 'transparent' : '#4A90E2',
           }}
         >
-          {invitacion.grupo?.foto_bg ? (
+          {invitacion.grupo?.foto_grupo ? (
             <Image
-              source={{ uri: invitacion.grupo.foto_bg }}
+              source={{ uri: invitacion.grupo.foto_grupo }}
               className="w-full h-full"
               resizeMode="cover"
             />
@@ -146,7 +146,7 @@ export default function InvitationsList() {
 
           {/* Usuario que invitó */}
           <View className="flex-row items-center mt-2 mb-3">
-            <View className="w-8 h-8 rounded-full bg-blue-400 items-center justify-center mr-2">
+            <View className="w-8 h-8 rounded-full bg-white items-center justify-center mr-2">
               {invitacion.invitedBy?.avatar ? (
                 <Image
                   source={{ uri: invitacion.invitedBy.avatar }}
@@ -167,7 +167,7 @@ export default function InvitationsList() {
           {/* Tiempo restante */}
           <View
             className={`px-3 py-1 rounded-full self-start ${
-              isExpiringSoon ? 'bg-yellow-100' : 'bg-gray-100'
+              isExpiringSoon ? 'bg-yellow-50' : 'bg-white-100'
             }`}
           >
             <Text

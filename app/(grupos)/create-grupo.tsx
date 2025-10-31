@@ -1,11 +1,13 @@
-import CustomButton from '@/components/CustomButton';
-import { createGrupo } from '@/lib/appwrite/index';
-import useAuthBear from '@/store/auth.store';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import CustomButton from "@/components/CustomButton";
+import { createGrupo, uploadGrupoPhoto } from "@/lib/appwrite/index";
+import useAuthBear from "@/store/auth.store";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
   Alert,
+  Image,
   Keyboard,
   ScrollView,
   Text,
@@ -13,66 +15,116 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CreateGrupo() {
   const { user, fetchAuthenticatedUser } = useAuthBear();
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePickImage = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permisos necesarios",
+          "Necesitamos acceso a tus fotos para agregar una imagen a la meta"
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (e) {
+      console.log("Error picking image:", e);
+      Alert.alert("Error", "No se pudo seleccionar la imagen");
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+  };
 
   const handleSubmit = async () => {
     // Validaciones
     if (!nombre.trim()) {
-      Alert.alert('Error', 'Por favor ingresa un nombre para el grupo');
+      Alert.alert("Error", "Por favor ingresa un nombre para el grupo");
       return;
     }
 
     if (nombre.trim().length < 3) {
-      Alert.alert('Error', 'El nombre debe tener al menos 3 caracteres');
+      Alert.alert("Error", "El nombre debe tener al menos 3 caracteres");
       return;
     }
 
     if (nombre.trim().length > 50) {
-      Alert.alert('Error', 'El nombre no puede tener más de 50 caracteres');
+      Alert.alert("Error", "El nombre no puede tener más de 50 caracteres");
       return;
     }
 
     if (descripcion.trim().length > 150) {
-      Alert.alert('Error', 'La descripción no puede tener más de 150 caracteres');
+      Alert.alert(
+        "Error",
+        "La descripción no puede tener más de 150 caracteres"
+      );
       return;
     }
 
     if (!user?.$id) {
-      Alert.alert('Error', 'Usuario no encontrado');
+      Alert.alert("Error", "Usuario no encontrado");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      let fotoUrl: string | undefined = undefined;
+      let fotoFileId: string | undefined = undefined;
+
+      // Subir imagen si se seleccionó una
+      if (selectedImage) {
+        const tempGroupId = `temp_${Date.now()}`;
+        const uploadResult = await uploadGrupoPhoto(selectedImage, tempGroupId);
+        fotoUrl = uploadResult.fileUrl;
+        fotoFileId = uploadResult.fileId;
+      }
+
       const result = await createGrupo({
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
         userId: user.$id,
+        ...(fotoUrl && { foto_grupo: fotoUrl }),
+        ...(fotoFileId && { foto_grupo_file_id: fotoFileId }),
       });
 
       // Refrescar datos del usuario
       await fetchAuthenticatedUser();
 
       Alert.alert(
-        '¡Grupo Creado!',
+        "¡Grupo Creado!",
         `Tu grupo "${nombre}" ha sido creado exitosamente.\n\nTAG: #${result.tag}\n\nComparte este TAG con tus amigos para que puedan unirse.`,
         [
           {
-            text: 'OK',
-            onPress: () => router.push('/(tabs)/grupos'),
+            text: "OK",
+            onPress: () => router.push("/(tabs)/grupos"),
           },
         ]
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo crear el grupo');
+      Alert.alert("Error", error.message || "No se pudo crear el grupo");
     } finally {
       setIsSubmitting(false);
     }
@@ -86,9 +138,15 @@ export default function CreateGrupo() {
           <View className="bg-white px-6 pt-4 pb-6 border-b border-gray-100">
             <View className="flex-row items-center justify-between">
               <TouchableOpacity onPress={() => router.back()}>
-                <MaterialCommunityIcons name="arrow-left" size={24} color="#374151" />
+                <MaterialCommunityIcons
+                  name="arrow-left"
+                  size={24}
+                  color="#374151"
+                />
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-gray-800">Crear Grupo</Text>
+              <Text className="text-xl font-bold text-gray-800">
+                Crear Grupo
+              </Text>
               <View className="w-6" />
             </View>
           </View>
@@ -114,6 +172,56 @@ export default function CreateGrupo() {
                 <Text className="text-sm text-gray-500 text-center mt-2 px-4">
                   Invita a tus amigos y ahorren juntos para alcanzar sus metas
                 </Text>
+              </View>
+
+              {/* Selector de Imagen */}
+              <View className="bg-white rounded-2xl p-6 mb-6">
+                <Text className="text-sm font-semibold text-gray-600 mb-3">
+                  Imagen de la Meta (Opcional)
+                </Text>
+
+                {selectedImage ? (
+                  <View className="relative">
+                    <Image
+                      source={{ uri: selectedImage }}
+                      className="w-full h-48 rounded-xl"
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      onPress={handleRemoveImage}
+                      className="absolute top-2 right-2 bg-red-500 rounded-full p-2"
+                      style={{
+                        elevation: 3,
+                        shadowColor: "#000",
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="close"
+                        size={20}
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={handlePickImage}
+                    className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-8 items-center"
+                  >
+                    <MaterialCommunityIcons
+                      name="image-plus"
+                      size={48}
+                      color="#9CA3AF"
+                    />
+                    <Text className="text-gray-600 font-semibold mt-3">
+                      Agregar imagen
+                    </Text>
+                    <Text className="text-gray-400 text-xs mt-1 text-center">
+                      Toca para seleccionar una imagen representativa
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* Nombre del grupo */}
@@ -164,7 +272,8 @@ export default function CreateGrupo() {
                   style={{ marginRight: 12 }}
                 />
                 <Text className="flex-1 text-sm text-blue-700">
-                  Se generará automáticamente un TAG único que podrás compartir con tus amigos para que se unan al grupo
+                  Se generará automáticamente un TAG único que podrás compartir
+                  con tus amigos para que se unan al grupo
                 </Text>
               </View>
             </View>

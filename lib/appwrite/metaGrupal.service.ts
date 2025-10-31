@@ -1,3 +1,4 @@
+import { CreateMetaGrupalParams, RegistrarAporteParams } from '@/types/type';
 import { ID, Query } from 'react-native-appwrite';
 import { appWriteConfig, database } from './config';
 
@@ -13,16 +14,7 @@ export const createMetaGrupal = async ({
   userId,
   foto_meta,
   foto_meta_file_id,
-}: {
-  nombre: string;
-  descripcion?: string;
-  monto_objetivo: number;
-  fecha_objetivo?: string;
-  groupId: string;
-  userId: string;
-  foto_meta?: string;
-  foto_meta_file_id?: string;
-}) => {
+}: CreateMetaGrupalParams ) => {
   try {
     // Verificar que el usuario sea admin del grupo
     const membership = await database.listRows({
@@ -180,12 +172,7 @@ export const registrarAporteMetaGrupal = async ({
   userId,
   monto,
   cuentaId,
-}: {
-  metaId: string;
-  userId: string;
-  monto: number;
-  cuentaId: string;
-}) => {
+}: RegistrarAporteParams ) => {
   try {
     // Obtener la meta
     const meta = await database.getRow({

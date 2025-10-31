@@ -1,4 +1,5 @@
 import CustomButton from '@/components/CustomButton';
+import DateInput from '@/components/DateInput';
 import { createMetaGrupal, uploadMetaGrupalPhoto } from '@/lib/appwrite/index';
 import useAuthBear from '@/store/auth.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -113,24 +114,6 @@ export default function CreateMetaGrupal() {
       return;
     }
 
-    let fechaObjetivoISO: string | undefined = undefined;
-    if (fechaObjetivo.trim()) {
-      const fecha = new Date(fechaObjetivo);
-      if (isNaN(fecha.getTime())) {
-        Alert.alert('Error', 'Formato de fecha inválido');
-        return;
-      }
-
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-      if (fecha < hoy) {
-        Alert.alert('Error', 'La fecha objetivo debe ser posterior a hoy');
-        return;
-      }
-
-      fechaObjetivoISO = fecha.toISOString();
-    }
-
     if (!user?.$id) {
       Alert.alert('Error', 'Usuario no encontrado');
       return;
@@ -154,7 +137,7 @@ export default function CreateMetaGrupal() {
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
         monto_objetivo: monto,
-        fecha_objetivo: fechaObjetivoISO,
+        fecha_objetivo: fechaObjetivo,
         groupId: grupoId,
         userId: user.$id,
         ...(fotoUrl && { foto_meta: fotoUrl }),
@@ -329,16 +312,11 @@ export default function CreateMetaGrupal() {
                 <Text className="text-sm font-semibold text-gray-600 mb-3">
                   Fecha Objetivo (Opcional)
                 </Text>
-                <TextInput
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#999"
-                  value={fechaObjetivo}
-                  onChangeText={setFechaObjetivo}
-                  className="bg-gray-50 rounded-xl px-4 py-3 border-2 border-gray-200 text-base text-gray-800"
+                <DateInput
+                  placeholder='Ingresa la fecha objetivo'
+                  title='Fecha Objetivo'
+                  onChangeText={(date) => setFechaObjetivo(date)}
                 />
-                <Text className="text-xs text-gray-400 mt-2 ml-1">
-                  Formato: AAAA-MM-DD (Ej: 2025-12-31)
-                </Text>
               </View>
 
               {/* Info */}

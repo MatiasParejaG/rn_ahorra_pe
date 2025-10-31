@@ -115,13 +115,7 @@ export default function MetasGrupalesList() {
               className="w-full h-full"
               resizeMode="cover"
             />
-            {/* Overlay con gradiente */}
-            <View
-              className="absolute bottom-0 left-0 right-0 h-20"
-              style={{
-                backgroundColor: "rgba(0,0,0,0.4)",
-              }}
-            />
+
             {/* Badge de estado sobre la imagen */}
             <View className="absolute top-3 right-3">
               {meta.estado ? (
@@ -131,7 +125,7 @@ export default function MetasGrupalesList() {
                   </Text>
                 </View>
               ) : (
-                <View className="bg-blue-500 px-3 py-1.5 rounded-full">
+                <View className="bg-primary px-3 py-1.5 rounded-full">
                   <Text className="text-white font-bold text-xs">
                     {Math.round(progress)}%
                   </Text>
@@ -172,8 +166,8 @@ export default function MetasGrupalesList() {
                   </Text>
                 </View>
               ) : (
-                <View className="bg-blue-100 px-3 py-1 rounded-full">
-                  <Text className="text-blue-700 font-bold text-sm">
+                <View className="bg-orange-100 px-3 py-1 rounded-full">
+                  <Text className="text-primary font-bold text-sm">
                     {Math.round(progress)}%
                   </Text>
                 </View>
@@ -188,7 +182,7 @@ export default function MetasGrupalesList() {
                 className="h-full rounded-full"
                 style={{
                   width: `${Math.min(progress, 100)}%`,
-                  backgroundColor: meta.estado ? "#10B981" : "#4A90E2",
+                  backgroundColor: "#29da00",
                 }}
               />
             </View>

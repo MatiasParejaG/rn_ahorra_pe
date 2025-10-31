@@ -141,7 +141,7 @@ export default function GrupoDetail() {
                   </Text>
                 </View>
               ) : (
-                <View className="bg-blue-500 px-3 py-1 rounded-full">
+                <View className="bg-primary px-3 py-1 rounded-full">
                   <Text className="text-white font-bold text-xs">
                     {Math.round(progress)}%
                   </Text>
@@ -174,8 +174,8 @@ export default function GrupoDetail() {
                   </Text>
                 </View>
               ) : (
-                <View className="bg-blue-100 px-2 py-1 rounded-full">
-                  <Text className="text-blue-700 font-bold text-xs">
+                <View className="bg-orange-100 px-2 py-1 rounded-full">
+                  <Text className="text-primary font-bold text-xs">
                     {Math.round(progress)}%
                   </Text>
                 </View>
@@ -184,12 +184,12 @@ export default function GrupoDetail() {
 
           {/* Progress Bar */}
           <View className="mb-3">
-            <View className="bg-gray-200 rounded-full h-2 overflow-hidden">
+            <View className="bg-gray-100 rounded-full h-2 overflow-hidden">
               <View
                 className="h-full rounded-full"
                 style={{
                   width: `${Math.min(progress, 100)}%`,
-                  backgroundColor: meta.estado ? "#10B981" : "#4A90E2",
+                  backgroundColor: "#29da00",
                 }}
               />
             </View>
@@ -341,12 +341,12 @@ export default function GrupoDetail() {
               <View
                 className="h-40"
                 style={{
-                  backgroundColor: grupo.foto_bg ? "transparent" : "#4A90E2",
+                  backgroundColor: grupo.foto_grupo ? "transparent" : "#4A90E2",
                 }}
               >
-                {grupo.foto_bg ? (
+                {grupo.foto_grupo ? (
                   <Image
-                    source={{ uri: grupo.foto_bg }}
+                    source={{ uri: grupo.foto_grupo }}
                     className="w-full h-full"
                     resizeMode="cover"
                   />

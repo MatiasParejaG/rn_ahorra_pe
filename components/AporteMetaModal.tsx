@@ -155,7 +155,7 @@ export default function AporteMetaModal({
             {/* Body */}
             <View className="p-6">
               {/* Info de la meta */}
-              <View className="bg-blue-50 rounded-xl p-4 mb-6">
+              <View className="bg-gray-50 rounded-xl p-4 mb-6">
                 <Text className="text-lg font-bold text-gray-800 mb-3">
                   {meta.nombre}
                 </Text>
@@ -164,7 +164,7 @@ export default function AporteMetaModal({
                 <View className="mb-3">
                   <View className="bg-gray-200 rounded-full h-3 overflow-hidden">
                     <View
-                      className="h-full rounded-full bg-blue-500"
+                      className="h-full rounded-full bg-green-400"
                       style={{ width: `${Math.min(progress, 100)}%` }}
                     />
                   </View>

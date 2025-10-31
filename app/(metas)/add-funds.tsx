@@ -164,9 +164,9 @@ export default function AddFunds() {
 
                 {/* Progress Bar */}
                 <View className="mb-3">
-                  <View className="bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <View className="bg-green-100 rounded-full h-3 overflow-hidden">
                     <View
-                      className="h-full rounded-full bg-blue-500"
+                      className="h-full rounded-full bg-green-400"
                       style={{ width: `${Math.min(progress, 100)}%` }}
                     />
                   </View>
