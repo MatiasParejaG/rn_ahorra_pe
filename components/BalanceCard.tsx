@@ -1,38 +1,66 @@
+import { images } from '@/constants/images';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, Text, TouchableOpacity, View } from 'react-native';
 
 interface BalanceCardProps {
   balance: string;
-  percentageChange: string;
 }
 
-export default function BalanceCard({ balance, percentageChange }: BalanceCardProps) {
+export default function BalanceCard({ balance }: BalanceCardProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   return (
-    <View className="bg-gradient-to-r rounded-3xl p-5 overflow-hidden"
-          style={{
-            backgroundColor: '#ff921b',
-            shadowColor: '#000',
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            elevation: 5,
-          }}>
-      <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-white text-sm font-semibold">Saldo Total</Text>
-        <TouchableOpacity onPress={() => setIsVisible(!isVisible)}>
-          <MaterialCommunityIcons
-            name={isVisible ? 'eye' : 'eye-off'}
-            size={18}
-            color="white"
-          />
-        </TouchableOpacity>
-      </View>
-      <Text className="text-white text-3xl font-bold mb-1">
-        {isVisible ? balance : '••••••'}
-      </Text>
-      <Text className="text-orange-50 text-xs">↑ {percentageChange}</Text>
+    <View 
+      className="rounded-3xl overflow-hidden"
+      style={{
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 8,
+        aspectRatio: 1.586, 
+      }}
+    >
+      <ImageBackground
+        source={images.tarjeta}
+        className="w-full h-full"
+        resizeMode="cover"
+      >
+        <View className="absolute inset-0 bg-transparent" />
+        
+        {/* Contenido de la tarjeta */}
+        <View className="flex-1 p-6">
+          {/* Header con botón de visibilidad en la derecha */}
+          <View className="flex-row items-center justify-end mb-4">
+            <TouchableOpacity 
+              onPress={() => setIsVisible(!isVisible)}
+              className="rounded-full p-2"
+              style={{
+                backgroundColor: '#064e3b',
+              }}
+            >
+              <MaterialCommunityIcons
+                name={isVisible ? 'eye' : 'eye-off'}
+                size={18}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Espaciador para empujar el saldo hacia abajo */}
+          <View className="flex-1" />
+
+          {/* Saldo en la esquina inferior izquierda */}
+          <View className="items-start">
+            <Text className="text-white text-4xl font-bold mb-1 tracking-wider">
+              {isVisible ? balance : '••••••'}
+            </Text>
+            <Text className="text-white/90 text-sm font-bold">
+              Saldo Actual
+            </Text>
+          </View>
+        </View>
+      </ImageBackground>
     </View>
   );
 }

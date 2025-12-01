@@ -100,7 +100,7 @@ export default function Index() {
     router.push('/(tabs)/transaction-list');
   };
 
-  // Mostrar solo las primeras 3 metas activas
+  
   const displayedMetas = userMetas.filter(m => !m.estado).slice(0, 3);
 
   return (
@@ -113,9 +113,7 @@ export default function Index() {
             userAvatar={user?.avatar}
             onLogout={handleLogout}
           />
-
-          {/* Saldo Total Card with Gradient */}
-          <BalanceCard balance={formatBalance()} percentageChange="+15% este mes" />
+          <BalanceCard balance={formatBalance()}/>
         </View>
 
         {/* Quick Actions */}

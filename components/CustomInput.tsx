@@ -1,22 +1,19 @@
 import { CustomInputProps } from "@/types/type";
 import cn from "clsx";
 import React, { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 
-const CustomInput = ({ 
-    placeholder = "Ingresa texto",
-    value,
-    onChangeText,
-    label,
-    secureTextEntry = false,
-    keyboardType = "default" 
+const CustomInput = ({
+  placeholder = "Ingresa texto",
+  value,
+  onChangeText,
+  secureTextEntry = false,
+  keyboardType = "default",
 }: CustomInputProps) => {
-    
-    const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-    return (
+  return (
     <View className="w-full">
-      <Text className="text-m font-bold text-white-100 mb-2">{label}</Text>
       <TextInput
         autoCapitalize="none"
         autoCorrect={false}
@@ -27,10 +24,10 @@ const CustomInput = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder={placeholder}
-        placeholderTextColor="#999"
+        placeholderTextColor="#9CA3AF"
         className={cn(
-          'w-full px-4 py-3 rounded-lg leading-5 border-2 text-base text-gray-900',
-          isFocused ? 'border-primary bg-orange-50' : 'border-gray-300 bg-gray-50'
+          "w-full px-4 py-4 rounded-xl text-base text-gray-900 bg-gray-50 border-2",
+          isFocused ? "border-primary bg-orange-50" : "border-gray-200"
         )}
       />
     </View>
