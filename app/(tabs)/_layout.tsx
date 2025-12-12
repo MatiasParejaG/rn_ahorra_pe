@@ -96,7 +96,7 @@ export default function TabLayout() {
           },
           tabBarBackground: () => (
             <BlurView
-              intensity={30}
+              intensity={70}
               tint="light"
               style={{
                 borderRadius: 50,
@@ -104,7 +104,7 @@ export default function TabLayout() {
                 flex: 1,
                 backgroundColor: Platform.OS === 'ios' 
                   ? 'rgba(255, 255, 255, 0.1)' 
-                  : 'rgba(255, 255, 255, 0.5)',
+                  : 'rgba(255, 255, 255, 0.7)',
               }}
             />
           ),

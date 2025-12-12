@@ -1,7 +1,7 @@
-import { images } from '@/constants/images';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { ImageBackground, Text, TouchableOpacity, View } from 'react-native';
+import { images } from "@/constants/images";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useState } from "react";
+import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 
 interface BalanceCardProps {
   balance: string;
@@ -11,14 +11,14 @@ export default function BalanceCard({ balance }: BalanceCardProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   return (
-    <View 
+    <View
       className="rounded-3xl overflow-hidden"
       style={{
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOpacity: 0.2,
         shadowRadius: 10,
         elevation: 8,
-        aspectRatio: 1.586, 
+        aspectRatio: 1.586,
       }}
     >
       <ImageBackground
@@ -27,20 +27,20 @@ export default function BalanceCard({ balance }: BalanceCardProps) {
         resizeMode="cover"
       >
         <View className="absolute inset-0 bg-transparent" />
-        
+
         {/* Contenido de la tarjeta */}
-        <View className="flex-1 p-6">
+        <View className="flex-1 px-6 py-3">
           {/* Header con botón de visibilidad en la derecha */}
           <View className="flex-row items-center justify-end mb-4">
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setIsVisible(!isVisible)}
               className="rounded-full p-2"
               style={{
-                backgroundColor: '#064e3b',
+                backgroundColor: "orange",
               }}
             >
               <MaterialCommunityIcons
-                name={isVisible ? 'eye' : 'eye-off'}
+                name={isVisible ? "eye" : "eye-off"}
                 size={18}
                 color="white"
               />
@@ -52,10 +52,10 @@ export default function BalanceCard({ balance }: BalanceCardProps) {
 
           {/* Saldo en la esquina inferior izquierda */}
           <View className="items-start">
-            <Text className="text-white text-4xl font-bold mb-1 tracking-wider">
-              {isVisible ? balance : '••••••'}
+            <Text className="text-white text-4xl font-bold tracking-wider">
+              {isVisible ? balance : "••••••••"}
             </Text>
-            <Text className="text-white/90 text-sm font-bold">
+            <Text className="text-white/90 text-lg font-bold">
               Saldo Actual
             </Text>
           </View>

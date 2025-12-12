@@ -51,7 +51,7 @@ export default function Welcome() {
               title="Registrarse"
               onPress={() => router.push("/sign-up")}
               style="bg-white border-2 border-primary"
-              textStyle="text-orange-400"
+              textStyle="text-black"
             />
           </View>
         </View>
