@@ -50,17 +50,17 @@
 
 |             Escanear QR             |            Vincular             |
 | :---------------------------------: | :-----------------------------: |
-| ![Scan QR](screenshots/scan_qr.png) | ![Claim](screenshots/claim.png) |
+| ![Scan QR](screenshots/scan_qr.png) | ![Claim](screenshots/claim.jpeg) |
 |    _Cámara para leer QR físico_     | _Asignar nombre al dispositivo_ |
 
 ---
 
 ### Perfil
 
-|             Mi Perfil             |
-| :-------------------------------: |
-| ![Perfil](screenshots/perfil.png) |
-|  _Perfil de usuario y métricas_   |
+|             Mi Perfil             |  |  |
+| :-------------------------------: | :-------------------------------------------: | :---------------------------------------: |
+| ![Perfil](screenshots/perfil.png) |  |  |
+|  _Perfil de usuario y métricas_   |  |  |
 
 ---
 
